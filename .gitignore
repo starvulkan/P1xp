@@ -1,0 +1,17 @@
+# ignore this nothing to see here
+node_modules
+dist
+dist-ssr
+dist-electron
+release
+*.local
+*.log
+npm-debug.log*
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?
+.env
