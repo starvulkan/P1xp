@@ -17,7 +17,7 @@ export const F1TEAMS = {
   cadillac:    { name: 'Cadillac',         primary: '#000000', secondary: '#CFD4D9' },
 }
 
-export const TEAM_KEYS = Object.keys(TEAMS)
+export const TEAM_KEYS = Object.keys(F1TEAMS)
 export const FALLBACK = '#8A9099'
 
 export function normaliseHex(hex) {

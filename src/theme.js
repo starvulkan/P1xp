@@ -16,7 +16,7 @@ export async function set(key) {
 }
 
 export function apply(key) {
-  const team = TEAMS[key] || TEAMS[DEFAULT_TEAM]
+  const team = F1TEAMS[key] || F1TEAMS[DEFAULT_TEAM]
   const root = document.documentElement
   root.dataset.team = TEAM_KEYS.includes(key) ? key : DEFAULT_TEAM
   root.style.setProperty('--team', team.primary)
