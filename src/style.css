@@ -1,299 +1,373 @@
-// bruh wtf i just realized i never updated the default css stylesheet that comes with vite building lol 
-// HERES MY FRIENDLY REMINDER TO UPDATE THIS TOMORROWWWWW
-
+/* variables for easy access throughout the stylesheet */ 
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --bg: #08090B;
+  --panel: #101318;
+  --panel-2: #171B21;
+  --line: #23272F;
+  --fg: #F3F4F6;
+  --muted: #7C838D;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --team: #E8002D;
+  --team-2: #FFF200;
+  --on-team: #FFFFFF;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --gap: 2px;
+  --pad: 1.5rem;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+* { 
+  box-sizing: border-box; 
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+html, body { 
+  height: 100%; 
 }
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+[hidden] { display: none !important; }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+/* buttons you click and they do something ! oh yea and shared marks!*/
+
+.tag {
+  display: inline-block;
   margin: 0;
+  padding: 0.3rem 0.7rem 0.3rem 0.6rem;
+  background: var(--team);
+  color: var(--on-team);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: skewX(-12deg);
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.tag > span { 
+  display: inline-block; transform: skewX(12deg); 
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.btn {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel-2);
+  color: var(--fg);
+  font: 800 0.72rem var(--font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+.btn:hover { 
+  border-color: var(--team); 
+}
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+.btn:disabled { 
+  opacity: 0.35; cursor: not-allowed; 
+}
+
+.btn--team {
+  border-color: var(--team);
+  background: var(--team);
+  color: var(--on-team);
+}
+
+.btn:focus-visible, .choice:focus-visible { 
+  outline: 2px solid var(--team); outline-offset: 2px; 
+}
+
+/* funny little bar at the top */
+
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem var(--pad);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar__logo { 
+  height: 34px; width: auto; 
+}
+
+/* your home! here's where u live when u watch f1 */
+
+.home {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 22rem;
+  gap: var(--gap);
+  background: var(--line);
+  border-top: 1px solid var(--line);
 }
 
 .hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  padding: var(--pad);
+  background: var(--panel);
+  border-left: 5px solid var(--team);
+  min-width: 0;
 }
 
-#center {
+.hero__fill { 
+  flex: 1; min-height: var(--pad); 
+}
+
+.hero__meeting {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.hero__circuit {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero__time {
+  margin: 0.6rem 0 0;
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.045em;
+}
+
+.hero__time--live { 
+  color: var(--team); 
+}
+
+.hero__when {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* program yourself in f1 with schedules! idk what to comment for these separators bro im so tired */
+
+.sched {
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  background: var(--panel);
+  min-height: 0;
 }
 
-#next-steps {
+.sched__title {
+  flex: none;
+  margin: 0;
+  padding: var(--pad) var(--pad) 0.9rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sched__list {
+  flex: 1;
   display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.sched__item {
+  flex: 1;
   display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pad);
+  padding: 0 var(--pad);
+  border-top: 1px solid var(--line);
+  border-left: 3px solid transparent;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.sched__item:last-child { 
+  border-bottom: 1px solid var(--line); 
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
+.sched__item[data-state="finished"] { 
+  color: var(--muted); 
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+.sched__item[data-state="finished"] .sched__name { 
+  font-weight: 600; 
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+.sched__item[data-state="live"] {
+  border-left-color: var(--team);
+  background: var(--panel-2);
+}
+
+.sched__name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sched__time {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .home { grid-template-columns: 1fr; }
+  .sched__item { min-height: 3.2rem; }
+}
+
+/* first time setup wizard, the one that sets your driver and team choices, as well as your current financial condition in f1 terms. */
+
+.wizard {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: var(--pad);
+  background: rgb(0 0 0 / 0.82);
+}
+
+.wizard__panel {
+  width: min(44rem, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: var(--pad);
+  background: var(--panel);
+  border-left: 5px solid var(--team);
+}
+
+.wizard__logo { 
+  display: block; 
+  height: 40px; 
+  width: auto; 
+  margin-bottom: var(--pad); 
+}
+
+.wizard__title {
+  margin: 0.8rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.wizard__hint {
+  margin: 0.3rem 0 var(--pad);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.wizard__nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: var(--pad);
+  padding-top: var(--pad);
+  border-top: 1px solid var(--line);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.choices--drivers { 
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); 
+  max-height: 42vh; 
+  overflow-y: auto; 
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: none;
+  border-left: 3px solid transparent;
+  background: var(--panel-2);
+  color: var(--fg);
+  font: 700 0.82rem var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice::before {
+  content: "";
+  flex: none;
+  width: 0.55rem;
+  height: 1.15rem;
+  background: var(--choice, var(--team));
+  transform: skewX(-12deg);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+
+.choice:hover { 
+  background: var(--panel); 
+}
+
+.choice--on {
+  border-left-color: var(--team);
+  background: var(--panel);
+  color: var(--fg);
+}
+
+/* colors for your driver! */
+
+.dot {
+  fill: var(--dot);
+  stroke: var(--dot-ink);
+  stroke-width: 1.5;
+  paint-order: stroke;
+}
+
+.dot__label {
+  fill: var(--dot-ink);
+  font-size: 0.6rem;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--dot);
+  stroke-width: 2.5;
+}
+
+.tower__color {
+  width: 4px;
+  align-self: stretch;
+  background: var(--dot);
+  box-shadow: inset 0 0 0 1px var(--dot-ink);
 }

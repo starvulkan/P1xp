@@ -7,7 +7,61 @@
     <title>P1xp</title>
   </head>
   <body>
-    <div id="app"></div>
+    <header class="bar">
+      <img class="bar__logo" src="./lockup-white.png" alt="P1xp" />
+      <button class="btn btn--ghost" id="setup-open" type="button">Setup!</button>
+    </header>
+
+    <main class="home">
+      <section class="hero">
+        <p class="hero__meeting" id="meeting-name">&nbsp;</p>
+        <p class="hero__circuit" id="meeting-circuit"></p>
+        <div class="hero__fill"></div>
+        <p class="tag" id="next-label">Loading the calendar</p>
+        <p class="hero__time" id="next-time">--:--:--</p>
+        <p class="hero__when" id="next-when"></p>
+      </section>
+
+      <aside class="sched">
+        <h2 class="sched__title">Session schedule</h2>
+        <ol class="sched__list" id="weekend-list"></ol>
+      </aside>
+    </main>
+
+    <div class="wizard" id="wizard" hidden>
+      <!-- First time setup wizard, sets up theming according to your favorite team, give onboard and team radio priority to your favorite driver, and determine the app layout according to your F1 TV subscription (if any)! -->
+      <div class="wizard__panel">
+        <img class="wizard__logo" src="./lockup-white.png" alt="P1xp" />
+
+        <section class="wizard__step" data-step>
+          <p class="tag">Step 1</p>
+          <h2 class="wizard__title">Pick your favorite team!</h2>
+          <p class="wizard__hint">P1xp's theme will be set to their colors!</p>
+          <div class="choices" id="setup-teams"></div>
+        </section>
+
+        <section class="wizard__step" data-step hidden>
+          <p class="tag">Step 2</p>
+          <h2 class="wizard__title">Pick your favorite driver!</h2>
+          <p class="wizard__hint">Their onboard and team radio get priority.</p>
+          <div class="choices choices--drivers" id="setup-drivers"></div>
+        </section>
+
+        <section class="wizard__step" data-step hidden>
+          <p class="tag">Step 3</p>
+          <h2 class="wizard__title">Are you a F1 TV subscriber?</h2>
+          <p class="wizard__hint">This determines how many stream spaces the live view keeps free.</p>
+          <div class="choices" id="setup-tiers"></div>
+        </section>
+
+        <div class="wizard__nav">
+          <button class="btn btn--ghost" id="setup-back" type="button">Back</button>
+          <button class="btn btn--team" id="setup-next" type="button">Next</button>
+          <button class="btn btn--team" id="setup-done" type="button">Let's go!</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

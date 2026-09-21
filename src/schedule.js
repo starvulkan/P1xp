@@ -67,8 +67,8 @@ export function countdown(target, now = Date.now()) {
 export function formatCountdown(target, now = Date.now()) {
     const c = countdown(target, now)
     const pad = (n) => String(n).padStart(2, '0')
-    if (c.days > 0) return `${c.days}d ${pad(c.hours)}h ${pad(c.minutes)}m`
-    return `${pad(c.hours)}:${pad(c.minutes)}:${pad(c.seconds)}`
+    const clock = `${pad(c.hours)}:${pad(c.minutes)}:${pad(c.seconds)}`
+    return c.days > 0 ? `${c.days}d ${clock}` : clock
 }
 
 export function localTime(ms) {

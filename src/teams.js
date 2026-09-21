@@ -46,7 +46,7 @@ export function paintTeam(key) {
 export function teamByName(name) {
   if (!name) return null
   const needle = String(name).toLowerCase().replace(/[^a-z]/g, '')
-  for (const [key, team] of Object.entries(TEAMS)) {
+  for (const [key, team] of Object.entries(F1TEAMS)) {
     const plain = team.name.toLowerCase().replace(/[^a-z]/g, '')
     if (needle.includes(plain) || plain.includes(needle)) return { key, ...team }
   }

@@ -61,15 +61,15 @@ export function mount({ rootEl, teamsEl, driversEl, tiersEl, stepEls, nextEl, ba
         if (colour) btn.style.setProperty('--choice', colour)
         btn.addEventListener('click', () => {
             choose(container, value, key)
-            if (key === 'team') { theme.apply(value); loadDrivers(value) }
+            if (key === 'team') theme.apply(value)
             if (key === 'tier') applyTier(value)
     })
     container.append(btn)
   }
 
-  async function loadDrivers(teamKey) {
+  async function loadDrivers() {
     driversEl.textContent = 'Loading drivers...'
-    const drivers = await fetchDrivers(teamKey)
+    const drivers = await fetchDrivers()
     driversEl.textContent = ''
     picked.driver = null
     if (drivers.length === 0) {
@@ -79,7 +79,7 @@ export function mount({ rootEl, teamsEl, driversEl, tiersEl, stepEls, nextEl, ba
         return
     }
     for (const d of drivers) {
-        button(driversEl, d.number, `${d.abbr} - ${d.name}`, 'driver', null)
+        button(driversEl, d.number, `${d.abbr} ${d.name}`, 'driver', d.colour)
     }
     render()
   }
@@ -91,6 +91,7 @@ export function mount({ rootEl, teamsEl, driversEl, tiersEl, stepEls, nextEl, ba
     button(tiersEl, key, label, 'tier', null)
   }
   choose(tiersEl, 'none', 'tier')
+  loadDrivers()
 
   nextEl.addEventListener('click', () => { step++; render() })
   backEl.addEventListener('click', () => { step--; render() })
