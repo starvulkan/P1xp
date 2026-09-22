@@ -24,6 +24,7 @@ export function normalise(raw) {
     short: shortName(raw.session_name),
     type: raw.session_type,
     circuit: raw.circuit_short_name || raw.location || '',
+    gp: raw.meeting_name || '',
     country: raw.country_name || '',
     start,
     end,

@@ -6,6 +6,7 @@ import * as theme from './theme.js'
 import * as setup from './setup.js'
 import * as schedule from './schedule.js'
 import { paint } from './teams.js'
+import * as tracks from './tracks.js'
 
 const API = 'https://api.openf1.org/v1'
 
@@ -17,6 +18,11 @@ const nextWhen = document.querySelector('#next-when')
 const weekendList = document.querySelector('#weekend-list')
 
 let sessions = []
+
+const applyTrack = tracks.mount({
+  photoEl: document.querySelector('#hero-photo'),
+  scrimEl: document.querySelector('#hero-scrim'),
+})
 
 async function getJSON(path) {
   try {
@@ -86,7 +92,9 @@ function renderWeekend() {
   weekendList.textContent = ''
   if (!target) return
 
-  meetingName.textContent = target.country
+  applyTrack(target)
+
+  meetingName.textContent = target.gp || target.country
   meetingCircuit.textContent = target.circuit
   for (const s of sessions.filter((x) => x.meeting === target.meeting)) {
     const item = document.createElement('li')
