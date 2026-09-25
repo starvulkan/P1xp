@@ -9,10 +9,13 @@
   <body>
     <header class="bar">
       <img class="bar__logo" src="./lockup-white.png" alt="P1xp" />
-      <button class="btn btn--ghost" id="setup-open" type="button">Setup!</button>
+      <div class="bar__actions">
+        <button class="btn" id="demo-open" type="button">Demo</button>
+        <button class="btn btn--ghost" id="setup-open" type="button">Setup!</button>
+      </div>
     </header>
 
-    <main class="home">
+    <main class="home" id="home">
       <section class="hero">
         <div class="hero__photo" id="hero-photo" aria-hidden="true" hidden></div>
         <div class="hero__scrim" id="hero-scrim" aria-hidden="true" hidden></div>
@@ -28,6 +31,57 @@
         <h2 class="sched__title">Session schedule</h2>
         <ol class="sched__list" id="weekend-list"></ol>
       </aside>
+    </main>
+
+    <main class="live" id="live" hidden>
+      <p class="replay" id="replay-bar" hidden>
+        <span id="replay-text">Replay</span>
+        <button class="btn" id="replay-exit" type="button">Exit demo</button>
+      </p>
+
+      <header class="live__head">
+        <p class="tag" id="live-session">Session</p>
+        <p class="live__clock" id="live-clock">00:00:00</p>
+        <p class="live__weather" id="live-weather"></p>
+        <p class="live__status" id="live-status" data-status="green">Track clear</p> 
+      </header>
+
+      <section class="pane pane--tower">
+        <h2 class="pane__title">Timing</h2>
+        <ol class="tower__list" id="tower-list"></ol>
+      </section>
+
+      <section class="pane pane--stream" id="pane-stream">
+        <h2 class="pane__title">Race feed</h2>
+        <div class="drop">
+          <p class="drop__hint">Place your F1 TV window right over here!</p>
+          <button class="btn btn--team" id="open-stream" type="button">Open F1 TV</button>
+        </div>
+      </section>
+
+      <section class="pane pane--onboard" id="pane-onboard">
+        <h2 class="pane__title">Onboard</h2>
+        <div class="drop">
+          <p class="drop__hint">Place your fav driver's onboard from F1 TV right over here!</p>
+          <button class="btn btn--team" id="open-onboard" type="button">Open onboard</button>
+        </div>
+      </section>
+
+      <section class="pane pane--map">
+        <h2 class="pane__title">Circuit</h2>
+        <div class="map" id="map"></div>
+      </section>
+
+      <section class="pane pane--feed">
+        <h2 class="pane__title">Race control</h2>
+        <ol class="feed" id="feed-list"></ol>
+      </section>
+
+      <section class="pane pane--radio">
+        <h2 class="pane__title">Team radio</h2>
+        <ol class="radio" id="radio-list"></ol>
+      </section>
+
     </main>
 
     <div class="wizard" id="wizard" hidden>

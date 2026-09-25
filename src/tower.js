@@ -18,6 +18,7 @@ export function mount({ listEl, statusEl, feedEl }) {
         cells.pos = add('tower__pos')
         cells.color = add('tower__color', 'i')
         cells.abbr = add('tower__abbr')
+        cells.pen = add('tower__pen')
         cells.tyre = add('tower__tyre')
         cells.lap = add('tower__lap')
         cells.gap = add('tower__gap')
@@ -36,6 +37,7 @@ export function mount({ listEl, statusEl, feedEl }) {
             el.classList.toggle('tower__row--fav', String(d.number) === String(favourite))
             cells.pos.textContent = d.pos
             cells.abbr.textContent = d.abbr
+            cells.pen.textContent = d.penalty || ''
             cells.tyre.textContent = d.compound || ''
             cells.tyre.dataset.compound = d.compound || ''
             cells.tyre.title = d.stintLaps ? `${d.stintLaps} laps on this set` : ''

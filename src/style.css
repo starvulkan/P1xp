@@ -402,3 +402,435 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* live stream view so like the main thing */
+
+.bar__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.live {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: var(--gap);
+  padding: var(--gap) 0 0;
+  background: var(--line);
+  grid-template-columns: minmax(17rem, 21rem) 1.55fr 1fr;
+  grid-template-rows: auto 1fr 1fr 0.9fr;
+}
+
+[data-tier="premium"] .live {
+  grid-template-columns: minmax(17rem, 21rem) 1fr 1fr;
+  grid-template-areas:
+    "head  head    head"
+    "tower stream  onboard"
+    "tower stream  onboard"
+    "tower map     feed"
+    "tower radio   feed";
+  grid-template-rows: auto 1.15fr 1.15fr 1fr 0.8fr;
+}
+
+[data-tier="pro"] .live {
+  grid-template-areas:
+    "head  head   head"
+    "tower stream feed"
+    "tower stream feed"
+    "tower map    radio";
+  grid-template-rows: auto 1.2fr 1.2fr 1fr;
+}
+
+[data-tier="none"] .live {
+  grid-template-columns: minmax(17rem, 21rem) 1.4fr 1fr;
+  grid-template-areas:
+    "head  head  head"
+    "tower map   feed"
+    "tower map   feed"
+    "tower radio radio";
+  grid-template-rows: auto 1fr 1fr 0.8fr;
+}
+
+[data-tier="none"] .pane--stream,
+[data-tier="none"] .pane--onboard,
+[data-tier="pro"] .pane--onboard { 
+  display: none; 
+}
+
+.replay {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pad);
+  margin: 0;
+  padding: 0.5rem var(--pad);
+  background: var(--team);
+  color: var(--on-team);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.replay .btn {
+  background: transparent;
+  border-color: currentColor;
+  color: inherit;
+}
+
+.replay:not([hidden]) ~ .live__head {
+  display: none;
+}
+
+.live__head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  gap: var(--pad);
+  padding: 0.75rem var(--pad);
+  background: var(--panel);
+}
+
+.live__clock {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.live__weather {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.live__status {
+  margin: 0 0 0 auto;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0B0D10;
+  background: #36C77E;
+}
+
+.live__status[data-status="yellow"],
+.live__status[data-status="vsc"] {
+  background: #FFD21E;
+}
+
+.live__status[data-status="sc"] {
+  background: #FF9F1C;
+}
+
+.live__status[data-status="red"] { 
+  background: #FF2D2D; 
+  color: #FFFFFF; 
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.pane--tower {
+  grid-area: tower;
+  border-left: 5px solid var(--team);
+}
+
+.pane--stream {
+  grid-area: stream;
+}
+
+.pane--onboard {
+  grid-area: onboard;
+}
+
+.pane--map {
+  grid-area: map;
+}
+
+.pane--feed {
+  grid-area: feed;
+}
+
+.pane--radio {
+  grid-area: radio;
+}
+
+.pane__title {
+  flex: none;
+  margin: 0;
+  padding: 0.8rem var(--pad) 0.6rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* timing tower for ur positions */
+
+.tower__list {
+  flex: 1;
+  margin: 0;
+  padding: 0 0 var(--gap);
+  list-style: none;
+  overflow-y: auto;
+}
+
+.tower__row {
+  display: grid;
+  grid-template-columns: 1.9rem 4px 3.2rem auto 1.4rem 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.38rem var(--pad);
+  border-top: 1px solid var(--line);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.tower__row--fav {
+  background: color-mix(in srgb, var(--team) 16%, transparent);
+}
+
+.tower__pos {
+  color: var(--muted);
+  text-align: right;
+}
+
+.tower__color {
+  width: 4px;
+  align-self: stretch;
+  background: var(--dot);
+  box-shadow: inset 0 0 0 1px var(--dot-ink);
+}
+
+.tower__abbr {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tower__pen {
+  padding: 0.05rem 0.3rem;
+  background: #FF9F1C;
+  color: #0B0D10;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.tower__pen:empty {
+  padding: 0;
+  background: none;
+}
+
+.tower__tyre {
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #0B0D10;
+}
+
+.tower__tyre[data-compound="S"] {
+  background: #FF3333;
+  color: #fff;
+}
+
+.tower__tyre[data-compound="M"] {
+  background: #FFD21E;
+}
+
+.tower__tyre[data-compound="H"] { 
+  background: #EDEDED; 
+}
+
+.tower__tyre[data-compound="I"] { 
+  background: #36C77E; 
+}
+
+.tower__tyre[data-compound="W"] { 
+  background: #3671C6; color: #fff; 
+}
+
+.tower__lap {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.tower__gap {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* drop zones for your f1 tv live session stream ! */
+
+.drop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0 var(--gap) var(--gap);
+  border: 2px dashed var(--line);
+}
+
+.drop__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.drop--open {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--team) 60%, var(--line));
+}
+
+/* race control by the Forever an Insufferable pain in the Arse (FIA) and team radios */
+
+.feed, .radio {
+  flex: 1;
+  margin: 0;
+  padding: 0 var(--pad) var(--pad);
+  list-style: none;
+  overflow-y: auto;
+}
+
+.feed__item {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
+}
+
+.feed__time {
+  flex: none;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.feed__text {
+  color: var(--fg);
+}
+
+.radio__play {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--fg);
+  font-size: 0.6rem;
+  cursor: pointer;
+}
+
+.radio__who {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.radio__time {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.radio__item--failed {
+  opacity: 0.45;
+}
+
+.radio__item--failed .radio__who::after {
+  content: " (no audio)";
+  font-weight: 400;
+}
+
+/* track map thats very cool and visual */
+
+.map {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  margin: 0 var(--pad) var(--pad);
+  border: 2px dashed var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.map::after {
+  content: "Waiting for car positions";
+}
+
+.map--live {
+  border: none;
+  margin: 0 var(--gap) var(--gap);
+}
+
+.map--live::after {
+  content: none;
+}
+
+.map__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.map__track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 14;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.map__car { 
+  transition: transform 620ms linear; 
+}
+
+.dot__label {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  paint-order: stroke;
+  stroke: #08090B;
+  stroke-width: 7;
+  fill: var(--dot-ink);
+}
+
+.map__car .dot { 
+  stroke-width: 4; 
+}
+
+.map__car--fav .dot {
+  stroke-width: 3;
+}
+
+@media (max-width: 1100px) {
+  .live { grid-template-columns: 1fr; grid-template-areas: "head" "tower" "map" "feed" "radio"; }
+  .pane--stream, .pane--onboard { display: none; }
+}

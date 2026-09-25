@@ -7,6 +7,10 @@ import * as setup from './setup.js'
 import * as schedule from './schedule.js'
 import { paint } from './teams.js'
 import * as tracks from './tracks.js'
+import * as trackmap from './trackmap.js'
+import * as tower from './tower.js'
+import * as radio from './radio.js'
+import { createFeed, fmtWeather, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 
 const API = 'https://api.openf1.org/v1'
 
@@ -17,7 +21,28 @@ const nextTime = document.querySelector('#next-time')
 const nextWhen = document.querySelector('#next-when')
 const weekendList = document.querySelector('#weekend-list')
 
+const homeEl = document.querySelector('#home')
+const liveEl = document.querySelector('#live')
+const liveSession = document.querySelector('#live-session')
+const liveClock = document.querySelector('#live-clock')
+const liveWeather = document.querySelector('#live-weather')
+const mapEl = document.querySelector('#map')
+const replayBar = document.querySelector('#replay-bar')
+const replayText = document.querySelector('#replay-text')
+
+const feed = createFeed()
+const renderTower = tower.mount({
+  listEl: document.querySelector('#tower-list'),
+  statusEl: document.querySelector('#live-status'),
+  feedEl: document.querySelector('#feed-list'),
+})
+const renderMap = trackmap.mount(mapEl)
+const renderRadio = radio.mount({ listEl: document.querySelector('#radio-list') })
+
 let sessions = []
+let liveKey = null
+let favourite = null
+let demo = false
 
 const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
@@ -62,9 +87,72 @@ async function loadSessions() {
   return list.map(schedule.normalise).sort((a, b) => a.start - b.start)
 }
 
+function paintLive() {
+  renderTower(feed.state, favourite)
+  renderRadio(feed.state, favourite)
+  liveWeather.textContent = fmtWeather(feed.state.weather)
+  if (renderMap(feed.state, favourite)) mapEl.classList.add('map--live')
+}
+
+async function enterLive(session) {
+  if (liveKey === session.key) return
+  liveKey = session.key
+  favourite = await setup.currentDriver()
+  homeEl.hidden = true
+  liveEl.hidden = false
+  liveSession.textContent = `${session.short} \u2502 ${session.circuit}`
+  await feed.start(session.key)
+}
+
+function leaveLive() {
+  if (liveKey === null) return
+  liveKey = null
+  feed.stop()
+  liveEl.hidden = true
+  homeEl.hidden = false
+  mapEl.classList.remove('map--live')
+}
+
+async function startDemo() {
+  demo = true
+  favourite = await setup.currentDriver()
+  homeEl.hidden = true
+  liveEl.hidden = false
+  replayBar.hidden = false
+  replayText.textContent = 'Loading replay...'
+  await feed.startReplay(DEMO_SESSION, { speed: DEMO_SPEED })
+  replayText.textContent = `Replay \u2502 ${DEMO_SPEED}x speed`
+}
+
+function stopDemo() {
+  demo = false
+  feed.stop()
+  replayBar.hidden = true
+  liveEl.hidden = true
+  homeEl.hidden = false
+  mapEl.classList.remove('map--live')
+}
+
 function renderCountdown() {
   const now = Date.now()
+
+  if (demo) {
+    liveClock.textContent = feed.state.clock
+      ? new Date(feed.state.clock).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : '--:--:--'
+      paintLive()
+      return
+  }
+
   const target = schedule.currentOrNext(sessions, now)
+
+  if (target && schedule.stateOf(target, now) === 'live') {
+    enterLive(target)
+    liveClock.textContent = schedule.elapsed(target, now)
+    paintLive()
+  } else {
+    leaveLive()
+  }
 
   if (!target) {
     nextLabel.textContent = sessions.length
@@ -124,6 +212,21 @@ async function start() {
     fetchDrivers,
   })
   document.querySelector('#setup-open').addEventListener('click', openSetup)
+  document.querySelector('#demo-open').addEventListener('click', startDemo)
+  document.querySelector('#replay-exit').addEventListener('click', stopDemo)
+
+  for (const [id, url] of [
+    ['#open-stream', 'https://f1tv.formula1.com/'],
+    ['#open-onboard', 'https://f1tv.formula1.com/'],
+  ]) {
+    const button = document.querySelector(id)
+    button.addEventListener('click', () => {
+      window.open(url, `p1xp${id}`, 'width=1280,height=720')
+      button.closest('.drop').classList.add('drop--open')
+      button.textContent = 'Reopen F1 TV'
+    })
+  }
+
   if (!(await setup.isDone())) openSetup()
 
   sessions = await loadSessions()

@@ -73,7 +73,7 @@ export function mount(rootEl) {
         const label = document.createElementNS(NS, 'text')
         label.setAttribute('class', 'dot__label')
         label.setAttribute('text-anchor', 'middle')
-        label.setAttribute('dy', '-22')
+        label.setAttribute('dy', '-26')
         g.append(dot, label)
         cars.append(g)
         marks.set(number, { g, dot, label })
