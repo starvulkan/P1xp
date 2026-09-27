@@ -35,7 +35,7 @@ const BY_CIRCUIT = {
     'lusail': 'qatar',
     'losail': 'qatar',
     'yas marina': 'abu-dhabi',
-    'sepang': 'malaysia',
+    'kuala lumpur': 'malaysia',
     'portimao': 'portugal',
     'algarve': 'portugal',
     'istanbul': 'turkiye', 
