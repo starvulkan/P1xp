@@ -1,0 +1,445 @@
+{
+    "schema": 1,
+    "note": "Fallback calendar usec to render the countdown offline.",
+    "source": "Official FIA Formula 1 World Championship calendar artwork",
+    "seasons": {
+        "2026": [
+            {
+                "round": 1,
+                "name": "Australian Grand Prix",
+                "country": "Australia",
+                "circuit": "Melbourne",
+                "start": "2026-03-06",
+                "end": "2026-03-08",
+                "sprint": false
+            },
+            {
+                "round": 2,
+                "name": "Chinese Grand Prix",
+                "country": "China",
+                "circuit": "Shanghai",
+                "start": "2026-03-13",
+                "end": "2026-03-15",
+                "sprint": true
+            },
+            {
+                "round": 3,
+                "name": "Japanese Grand Prix",
+                "country": "Japan",
+                "circuit": "Suzuka",
+                "start": "2026-03-27",
+                "end": "2026-03-29",
+                "sprint": false
+            },
+            {
+                "round": 4,
+                "name": "Bahrain Grand Prix",
+                "country": "Bahrain",
+                "circuit": "Sakhir",
+                "start": "2026-04-10",
+                "end": "2026-04-12",
+                "sprint": false
+            },
+            {
+                "round": 5,
+                "name": "Saudi Arabian Grand Prix",
+                "country": "Saudi Arabia",
+                "circuit": "Jeddah",
+                "start": "2026-04-17",
+                "end": "2026-04-19",
+                "sprint": false
+            },
+            {
+                "round": 6,
+                "name": "Miami Grand Prix",
+                "country": "United States",
+                "circuit": "Miami",
+                "start": "2026-05-01",
+                "end": "2026-05-03",
+                "sprint": true
+            },
+            {
+                "round": 7,
+                "name": "Canadian Grand Prix",
+                "country": "Canada",
+                "circuit": "Montreal",
+                "start": "2026-05-22",
+                "end": "2026-05-24",
+                "sprint": true
+            },
+            {
+                "round": 8,
+                "name": "Monaco Grand Prix",
+                "country": "Monaco",
+                "circuit": "Monte Carlo",
+                "start": "2026-06-05",
+                "end": "2026-06-07",
+                "sprint": false
+            },
+            {
+                "round": 9,
+                "name": "Barcelona-Catalunya Grand Prix",
+                "country": "Spain",
+                "circuit": "Catalunya",
+                "start": "2026-06-12",
+                "end": "2026-06-14",
+                "sprint": false
+            },
+            {
+                "round": 10,
+                "name": "Austrian Grand Prix",
+                "country": "Austria",
+                "circuit": "Spielberg",
+                "start": "2026-06-26",
+                "end": "2026-06-28",
+                "sprint": false
+            },
+            {
+                "round": 11,
+                "name": "British Grand Prix",
+                "country": "United Kingdom",
+                "circuit": "Silverstone",
+                "start": "2026-07-03",
+                "end": "2026-07-05",
+                "sprint": true
+            },
+            {
+                "round": 12,
+                "name": "Belgian Grand Prix",
+                "country": "Belgium",
+                "circuit": "Spa-Francorchamps",
+                "start": "2026-07-17",
+                "end": "2026-07-19",
+                "sprint": false
+            },
+            {
+                "round": 13,
+                "name": "Hungarian Grand Prix",
+                "country": "Hungary",
+                "circuit": "Hungaroring",
+                "start": "2026-07-24",
+                "end": "2026-07-26",
+                "sprint": false
+            },
+            {
+                "round": 14,
+                "name": "Dutch Grand Prix",
+                "country": "Netherlands",
+                "circuit": "Zandvoort",
+                "start": "2026-08-21",
+                "end": "2026-08-23",
+                "sprint": true
+            },
+            {
+                "round": 15,
+                "name": "Italian Grand Prix",
+                "country": "Italy",
+                "circuit": "Monza",
+                "start": "2026-09-04",
+                "end": "2026-09-06",
+                "sprint": false
+            },
+            {
+                "round": 16,
+                "name": "Spanish Grand Prix",
+                "country": "Spain",
+                "circuit": "Madrid",
+                "start": "2026-09-11",
+                "end": "2026-09-13",
+                "sprint": false,
+                "provisional": true
+            },
+            {
+                "round": 17,
+                "name": "Azerbaijan Grand Prix",
+                "country": "Azerbaijan",
+                "circuit": "Baku",
+                "start": "2026-09-24",
+                "end": "2026-09-26",
+                "sprint": false
+            },
+            {
+                "round": 18,
+                "name": "Singapore Grand Prix",
+                "country": "Singapore",
+                "circuit": "Singapore",
+                "start": "2026-10-09",
+                "end": "2026-10-11",
+                "sprint": true
+            },
+            {
+                "round": 19,
+                "name": "United States Grand Prix",
+                "country": "United States",
+                "circuit": "Austin",
+                "start": "2026-10-23",
+                "end": "2026-10-25",
+                "sprint": false
+            },
+            {
+                "round": 20,
+                "name": "Mexico City Grand Prix",
+                "country": "Mexico",
+                "circuit": "Mexico City",
+                "start": "2026-10-30",
+                "end": "2026-11-01",
+                "sprint": false
+            },
+            {
+                "round": 21,
+                "name": "Sao Paulo Grand Prix",
+                "country": "Brazil",
+                "circuit": "Interlagos",
+                "start": "2026-11-06",
+                "end": "2026-11-08",
+                "sprint": false
+            },
+            {
+                "round": 22,
+                "name": "Las Vegas Grand Prix",
+                "country": "United States",
+                "circuit": "Las Vegas",
+                "start": "2026-11-19",
+                "end": "2026-11-21",
+                "sprint": false
+            },
+            {
+                "round": 23,
+                "name": "Qatar Grand Prix",
+                "country": "Qatar",
+                "circuit": "Lusail",
+                "start": "2026-11-27",
+                "end": "2026-11-29",
+                "sprint": false
+            },
+            {
+                "round": 24,
+                "name": "Abu Dhabi Grand Prix",
+                "country": "United Arab Emirates",
+                "circuit": "Yas Marina Circuit",
+                "start": "2026-12-04",
+                "end": "2026-12-06",
+                "sprint": false
+            }
+        ],
+        "2027": [
+            {
+                "round": 1,
+                "name": "Bahrain Grand Prix",
+                "country": "Bahrain",
+                "circuit": "Sakhir",
+                "start": "2027-03-12",
+                "end": "2027-03-14",
+                "sprint": true
+            },
+            {
+                "round": 2,
+                "name": "Saudi Arabian Grand Prix",
+                "country": "Saudi Arabia",
+                "circuit": "Jeddah",
+                "start": "2027-03-19",
+                "end": "2027-03-21",
+                "sprint": false
+            },
+            {
+                "round": 3,
+                "name": "Australian Grand Prix",
+                "country": "Australia",
+                "circuit": "Melbourne",
+                "start": "2027-04-02",
+                "end": "2027-04-04",
+                "sprint": true
+            },
+            {
+                "round": 4,
+                "name": "Japanese Grand Prix",
+                "country": "Japan",
+                "circuit": "Suzuka",
+                "start": "2027-04-09",
+                "end": "2027-04-11",
+                "sprint": true
+            },
+            {
+                "round": 5,
+                "name": "Chinese Grand Prix",
+                "country": "China",
+                "circuit": "Shanghai",
+                "start": "2027-04-16",
+                "end": "2027-04-18",
+                "sprint": false
+            },
+            {
+                "round": 6,
+                "name": "Miami Grand Prix",
+                "country": "United States",
+                "circuit": "Miami",
+                "start": "2027-04-30",
+                "end": "2027-05-02",
+                "sprint": false
+            },
+            {
+                "round": 7,
+                "name": "Canadian Grand Prix",
+                "country": "Canada",
+                "circuit": "Montreal",
+                "start": "2027-05-21",
+                "end": "2027-05-23",
+                "sprint": true
+            },
+            {
+                "round": 8,
+                "name": "Monaco Grand Prix",
+                "country": "Monaco",
+                "circuit": "Monte Carlo",
+                "start": "2027-06-04",
+                "end": "2027-06-06",
+                "sprint": true
+            },
+            {
+                "round": 9,
+                "name": "Portuguese Grand Prix",
+                "country": "Portugal",
+                "circuit": "Portimao",
+                "start": "2027-06-18",
+                "end": "2027-06-20",
+                "sprint": false
+            },
+            {
+                "round": 10,
+                "name": "British Grand Prix",
+                "country": "United Kingdom",
+                "circuit": "Silverstone",
+                "start": "2027-07-02",
+                "end": "2027-07-04",
+                "sprint": true
+            },
+            {
+                "round": 11,
+                "name": "Austrian Grand Prix",
+                "country": "Austria",
+                "circuit": "Spielberg",
+                "start": "2027-07-09",
+                "end": "2027-07-11",
+                "sprint": false
+            },
+            {
+                "round": 12,
+                "name": "Belgian Grand Prix",
+                "country": "Belgium",
+                "circuit": "Spa-Francorchamps",
+                "start": "2027-07-23",
+                "end": "2027-07-25",
+                "sprint": false
+            },
+            {
+                "round": 13,
+                "name": "Hungarian Grand Prix",
+                "country": "Hungary",
+                "circuit": "Hungaroring",
+                "start": "2027-07-30",
+                "end": "2027-08-01",
+                "sprint": false
+            },
+            {
+                "round": 14,
+                "name": "Italian Grand Prix",
+                "country": "Italy",
+                "circuit": "Monza",
+                "start": "2027-09-03",
+                "end": "2027-09-05",
+                "sprint": true
+            },
+            {
+                "round": 15,
+                "name": "Spanish Grand Prix",
+                "country": "Spain",
+                "circuit": "Madrid",
+                "start": "2027-09-10",
+                "end": "2027-09-12",
+                "sprint": false
+            },
+            {
+                "round": 16,
+                "name": "Azerbaijan Grand Prix",
+                "country": "Azerbaijan",
+                "circuit": "Baku",
+                "start": "2027-09-24",
+                "end": "2027-09-26",
+                "sprint": false
+            },
+            {
+                "round": 17,
+                "name": "Turkish Grand Prix",
+                "country": "Turkiye",
+                "circuit": "Istanbul",
+                "start": "2027-10-01",
+                "end": "2027-10-03",
+                "sprint": false,
+                "provisional": true
+            },
+            {
+                "round": 18,
+                "name": "Singapore Grand Prix",
+                "country": "Singapore",
+                "circuit": "Singapore",
+                "start": "2027-10-08",
+                "end": "2027-10-10",
+                "sprint": false
+            },
+            {
+                "round": 19,
+                "name": "United States Grand Prix",
+                "country": "United States",
+                "circuit": "Austin",
+                "start": "2027-10-22",
+                "end": "2027-10-24",
+                "sprint": false
+            },
+            {
+                "round": 20,
+                "name": "Mexico City Grand Prix",
+                "country": "Mexico",
+                "circuit": "Mexico City",
+                "start": "2027-10-29",
+                "end": "2027-10-31",
+                "sprint": false
+            },
+            {
+                "round": 21,
+                "name": "Sao Paulo Grand Prix",
+                "country": "Brazil",
+                "circuit": "Interlagos",
+                "start": "2027-11-05",
+                "end": "2027-11-07",
+                "sprint": true
+            },
+            {
+                "round": 22,
+                "name": "Las Vegas Grand Prix",
+                "country": "United States",
+                "circuit": "Las Vegas",
+                "start": "2027-11-18",
+                "end": "2027-11-20",
+                "sprint": false
+            },
+            {
+                "round": 23,
+                "name": "Qatar Grand Prix",
+                "country": "Qatar",
+                "circuit": "Lusail",
+                "start": "2027-12-03",
+                "end": "2027-12-05",
+                "sprint": true
+            },
+            {
+                "round": 24,
+                "name": "Abu Dhabi Grand Prix",
+                "country": "United Arab Emirates",
+                "circuit": "Yas Marina Circuit",
+                "start": "2027-12-10",
+                "end": "2027-12-12",
+                "sprint": true
+            }
+        ]
+    }
+}

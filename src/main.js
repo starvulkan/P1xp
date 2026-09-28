@@ -11,6 +11,7 @@ import * as trackmap from './trackmap.js'
 import * as tower from './tower.js'
 import * as radio from './radio.js'
 import { createFeed, fmtWeather, DEMO_SESSION, DEMO_SPEED } from './f1.js'
+import * as calendar from './calendar.js'
 
 const API = 'https://api.openf1.org/v1'
 
@@ -40,6 +41,7 @@ const renderMap = trackmap.mount(mapEl)
 const renderRadio = radio.mount({ listEl: document.querySelector('#radio-list') })
 
 let sessions = []
+let weekends = []
 let liveKey = null
 let favourite = null
 let demo = false
@@ -80,11 +82,18 @@ async function fetchDrivers() {
     }))
 }
 
-async function loadSessions() {
-  const year = new Date().getFullYear()
-  const list = await getJSON(`/sessions?year=${year}`)
-  if (!Array.isArray(list)) return []
-  return list.map(schedule.normalise).sort((a, b) => a.start - b.start)
+function render() {
+  renderWeekend()
+  renderCountdown()
+}
+
+async function loadCalendar() {
+  weekends = await calendar.loadWeekends()
+  render()
+  const cached = await calendar.cachedSessions()
+  if (cached) { sessions = cached; render() }
+  const fresh = await calendar.refreshSessions()
+  if (fresh) { sessions = fresh; render() }
 }
 
 function paintLive() {
@@ -144,42 +153,61 @@ function renderCountdown() {
       return
   }
 
-  const target = schedule.currentOrNext(sessions, now)
+  const pick = calendar.targetFrom(sessions, weekends, now)
 
-  if (target && schedule.stateOf(target, now) === 'live') {
-    enterLive(target)
-    liveClock.textContent = schedule.elapsed(target, now)
+  if (pick.kind === 'live') {
+    enterLive(pick.session)
+    liveClock.textContext = schedule.elapsed(pick.session, now)
     paintLive()
   } else {
     leaveLive()
   }
 
-  if (!target) {
-    nextLabel.textContent = sessions.length
-      ? 'Season finished. See ya next year!'
-      : 'Could not reach the F1 calendar...'
+  if (pick.kind === 'none') {
+    nextLabel.textContent = 'Season finished. See ya next year!'
     nextTime.textContent = '--:--:--'
     nextWhen.textContent = ''
+    nextTime.classList.remove('hero__time--live')
     return
   }
 
-  const live = schedule.stateOf(target, now) === 'live'
+  if (pick.kind === 'weekend') {
+    const day = (ms) => new Date(ms).toLocaleDateString([], { month: 'short', day: 'numeric' })
+    const started = pick.at <= now
+    nextLabel.textContent = started
+      ? `${pick.weekend.name} ┃ race weekend`
+      : `Next up: ${pick.weekend.name}`
+    nextTime.textContent = started ? '--:--:--' : schedule.formatCountdown(pick.at, now)
+    nextTime.classList.remove('hero__time--live')
+    nextWhen.textContent = `${day(pick.at)} \u2013 ${day(Date.parse(`${pick.weekend.end}T12:00:00Z`))}`
+    return
+  }
+
+  const live = pick.kind === 'live'
   nextLabel.textContent = live
-    ? `${target.short} is live ┃ ${target.country}`
-    : `Next up: ${target.short} ┃ ${target.country}`
+    ? `${pick.session.short} is live ┃ ${pick.session.country}`
+    : `Next up: ${pick.session.short} ┃ ${pick.session.country}`
   nextTime.textContent = live
-    ? schedule.elapsed(target, now)
-    : schedule.formatCountdown(target.start, now)
+    ? schedule.elapsed(pick.session, now)
+    : schedule.formatCountdown(pick.at, now)
   nextTime.classList.toggle('hero__time--live', live)
-  nextWhen.textContent = schedule.localTime(target.start)
+  nextWhen.textContent = schedule.localTime(pick.at)
 }
 
 function renderWeekend() {
   const now = Date.now()
-  const target = schedule.currentOrNext(sessions, now)
+  const pick = calendar.targetFrom(sessions, weekends, now)
   weekendList.textContent = ''
-  if (!target) return
+  if (pick.kind === 'none') return
 
+  if (pick.kind === 'weekend') {
+    applyTrack(pick.weekend)
+    meetingName.textContent = pick.weekend.name
+    meetingCircuit.textContent = pick.weekend.circuit
+    return
+  }
+
+  const target = pick.session
   applyTrack(target)
 
   meetingName.textContent = target.gp || target.country
@@ -229,11 +257,10 @@ async function start() {
 
   if (!(await setup.isDone())) openSetup()
 
-  sessions = await loadSessions()
-  renderWeekend()
-  renderCountdown()
+  await loadCalendar()
   setInterval(renderCountdown, 1000)
   setInterval(renderWeekend, 60_000)
+  setInterval(loadCalendar, 30 * 60_000)
   }
 
   start()
