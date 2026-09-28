@@ -157,7 +157,7 @@ function renderCountdown() {
 
   if (pick.kind === 'live') {
     enterLive(pick.session)
-    liveClock.textContext = schedule.elapsed(pick.session, now)
+    liveClock.textContent = schedule.elapsed(pick.session, now)
     paintLive()
   } else {
     leaveLive()
