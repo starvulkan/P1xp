@@ -4,6 +4,7 @@ const API = 'https://api.openf1.org/v1'
 export const DEMO_SESSION = 9947
 export const DEMO_SPEED = 3
 export const DEMO_WINDOW_MIN = 10
+const SNAPSHOT = './demo.json'
 
 export const COMPOUND = {
     SOFT: 'S', MEDIUM: 'M', HARD: 'H', INTERMEDIATE: 'I', WET: 'W',
@@ -302,13 +303,16 @@ export function createFeed() {
         const rc = (rcAll || []).filter((m) => inWindow(m))
         const radio = (radioAll || []).filter((r) => r.recording_url && inWindow(r))
 
-        for (const s of stints || []) {
+        assemble({ pos, iv, laps, stints, rc, radio, weather, loc }, startAt)
+    }
+
+    function assemble(data, startAt) {
+        for (const s of data.stints || []) {
             const prev = stint.get(s.driver_number)
             if (!prev || s.stint_number >= prev.stint_number) stint.set(s.driver_number, s)
         }
 
-        const clean = (loc || []).filter((r) => Number.isFinite(r.x) && (r.x !== 0 || r.y !== 0))
-        // every other sample is plenty for a moving dot, and halves the work
+        const clean = (data.loc || []).filter((r) => Number.isFinite(r.x) && (r.x !== 0 || r.y !== 0))
         const dots = clean.filter((r, i) => i % 2 === 0)
         state.outline = clean.filter((r) => r.driver_number === startAt).map((r) => [r.x, r.y])
         if (state.outline.length < 50 && clean.length) {
@@ -319,13 +323,13 @@ export function createFeed() {
         const seen = []
         const heard = []
         streams = [
-            makeStream(pos, 'date', (r) => newest(position, r, 'date')),
-            makeStream(iv, 'date', (r) => newest(interval, r, 'date')),
-            makeStream(laps, 'date_start', (r) => newest(lap, r, 'date_start')),
-            makeStream(rc, 'date', (r) => { if (r.message) seen.push(r) }),
+            makeStream(data.pos, 'date', (r) => newest(position, r, 'date')),
+            makeStream(data.iv, 'date', (r) => newest(interval, r, 'date')),
+            makeStream(data.laps, 'date_start', (r) => newest(lap, r, 'date_start')),
+            makeStream(data.rc, 'date', (r) => { if (r.message) seen.push(r) }),
             makeStream(dots, 'date', (r) => newest(location, r, 'date')),
-            makeStream(radio, 'date', (r) => { heard.unshift(r); heard.length = Math.min(heard.length, 25) }),
-            makeStream(weather, 'date', (r) => { state.weather = r }),
+            makeStream(data.radio, 'date', (r) => { heard.unshift(r); heard.length = Math.min(heard.length, 25) }),
+            makeStream(data.weather, 'date', (r) => { state.weather = r }),
         ]
         streams.rc = { seen }
         streams.radio = { heard }
@@ -336,6 +340,37 @@ export function createFeed() {
         virtualStart = first.length ? Math.min(...first) : Date.now()
         wallStart = Date.now()
         state.loading = false
+    }
+
+    async function loadSnapshot(startAt) {
+        state.loading = true
+        state.progress = 'demo replay'
+        try {
+            const response = await fetch(SNAPSHOT, { signal: AbortSignal.timeout(20_000) })
+            if (!response.ok) throw new Error(`snapshot returned ${response.status}`)
+            const snap = await response.json()
+            if (!snap || !Array.isArray(snap.loc) || !snap.loc.length) throw new Error('snapshot is empty')
+            for (const d of snap.drivers || []) {
+                if (d.driver_number == null) continue
+                state.drivers[d.driver_number] = {
+                    number: d.driver_number,
+                    abbr: d.name_acronym || String(d.driver_number),
+                    name: d.full_name || '',
+                    team: d.team_name || '',
+                    colour: d.team_colour || '',
+                }
+            }
+            for (const r of snap.grid || []) newest(position, r, 'date')
+            for (const r of snap.gaps || []) newest(interval, r, 'date')
+            state.progress = ''
+            assemble(snap, startAt)
+            return true
+        }   catch (error) {
+            console.warn('snapshot:', error)
+            state.progress = ''
+            state.loading = false
+            return false
+        }
     }
 
     function every(ms, fn) {
@@ -358,8 +393,10 @@ export function createFeed() {
             sessionKey = key
             state.mode = 'replay'
             speed = rate
-            await loadDrivers()
-            await loadReplay(tracer, windowMin)
+            if (!(await loadSnapshot(tracer))) {
+                await loadDrivers()
+                await loadReplay(tracer, windowMin)
+            }
             every(400, advance)
         },
 
