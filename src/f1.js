@@ -418,7 +418,7 @@ export function createFeed() {
     return {
         state,
 
-        async start(key) {
+        async start(key, type = 'Race') {
             this.stop()
             sessionKey = key
             state.mode = 'live'
