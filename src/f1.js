@@ -46,6 +46,13 @@ function pickAnchor(messages, from, to) {
     return all.length ? all[Math.floor(all.length * 0.4)] : Date.now()
 }
 
+function fastest(target, row) {
+    const n = row.driver_number
+    if (n == null || !Number.isFinite(row.lap_duration) || row.lap_duration <= 0) return
+    const prev = target.get(n)
+    if (!prev || row.lap_duration < prev.lap_duration) target.set(n, row)
+}
+
 function newest(target, row, stamp) {
     const n = row.driver_number
     if (n == null) return
@@ -122,6 +129,7 @@ export function createFeed() {
         radio: [],
         weather: null,
         mode: 'live',
+        sessionType: 'Race',
         loading: false,
         progress: '',
         clock: 0,
@@ -133,6 +141,7 @@ export function createFeed() {
     const lap = new Map()
     const stint = new Map()
     const location = new Map()
+    const best = new Map()
 
     let sessionKey = null
     let timers = []
@@ -157,22 +166,31 @@ export function createFeed() {
     }
 
     function rebuild() {
+        const timed = state.sessionType !== 'Race'
         const rows = []
-        for (const [number, p] of position) {
+        const numbers = timed
+            ? [...new Set([...best.keys(), ...position.keys()])]
+            : [...position.keys()]
+
+        for (const number of numbers) {
             const driver = state.drivers[number]
-            if (!driver || p.position == null) continue
+            if (!driver) continue
+            const p = position.get(number)
+            if (!timed && (!p || p.position == null)) continue
             const s = stint.get(number)
             const i = interval.get(number)
             const l = lap.get(number)
+            const b = best.get(number)
             rows.push({
-                pos: p.position,
+                pos: timed ? null : p.position,
                 number,
                 abbr: driver.abbr,
                 team: driver.team,
                 colour: driver.colour,
-                gap: i ? i.gap_to_leader : null,
-                interval: i ? i.interval : null,
-                lastLap: l ? l.lap_duration : null,
+                gap: timed ? null : (i ? i.gap_to_leader : null),
+                interval: timed ? null : (i ? i.interval : null),
+                lastLap: timed ? (b ? b.lap_duration : null) : (l ? l.lap_duration : null),
+                bestLap: b ? b.lap_duration : null,
                 compound: s ? COMPOUND[s.compound] || null : null,
                 stintLaps: s && Number.isFinite(s.tyre_age_at_start) && Number.isFinite(l?.lap_number)
                     ? s.tyre_age_at_start + (l.lap_number - s.lap_start) + 1
@@ -180,7 +198,24 @@ export function createFeed() {
                 penalty: state.penalties[number] || null,
             })
         }
-        rows.sort((a, b) => a.pos - b.pos)
+
+        if (timed) {
+            rows.sort((a, b2) => {
+                if (a.bestLap == null && b2.bestLap == null) return a.number - b2.number
+                if (a.bestLap == null) return 1
+                if (b2.bestLap == null) return -1
+                return a.bestLap - b2.bestLap
+            })
+            const leader = rows.length && rows[0].bestLap != null ? rows[0].bestLap : null
+            rows.forEach((r, idx) => {
+                r.pos = idx + 1
+                r.gap = leader != null && r.bestLap != null ? r.bestLap - leader : null
+                r.interval = null
+            })
+        } else {
+            rows.sort((a, b2) => a.pos - b2.pos)
+        }
+
         state.timing = rows
 
         const dots = {}
@@ -208,7 +243,7 @@ export function createFeed() {
 
     for (const r of pos || []) newest(position, r, 'date')
     for (const r of iv || []) newest(interval, r, 'date')
-    for (const r of laps || []) newest(lap, r, 'date_start')
+    for (const r of laps || []) { newest(lap, r, 'date_start'); fastest(best, r) }
     for (const s of stints || []) {
         const prev = stint.get(s.driver_number)
         if (!prev || s.stint_number >= prev.stint_number) stint.set(s.driver_number, s)
@@ -265,6 +300,7 @@ export function createFeed() {
 
         const meta = await step('session', `/sessions?session_key=${sessionKey}`)
         const info = (meta && meta[0]) || null
+        state.sessionType = (info && info.session_type) || 'Race'
         const sStart = info ? new Date(info.date_start).getTime() : NaN
         const sEnd = info ? new Date(info.date_end).getTime() : NaN
         const safeFrom = Number.isFinite(sStart) ? sStart + 4 * 60_000 : NaN
@@ -325,7 +361,7 @@ export function createFeed() {
         streams = [
             makeStream(data.pos, 'date', (r) => newest(position, r, 'date')),
             makeStream(data.iv, 'date', (r) => newest(interval, r, 'date')),
-            makeStream(data.laps, 'date_start', (r) => newest(lap, r, 'date_start')),
+            makeStream(data.laps, 'date_start', (r) => { newest(lap, r, 'date_start'); fastest(best, r) }),
             makeStream(data.rc, 'date', (r) => { if (r.message) seen.push(r) }),
             makeStream(dots, 'date', (r) => newest(location, r, 'date')),
             makeStream(data.radio, 'date', (r) => { heard.unshift(r); heard.length = Math.min(heard.length, 25) }),
@@ -350,6 +386,7 @@ export function createFeed() {
             if (!response.ok) throw new Error(`snapshot returned ${response.status}`)
             const snap = await response.json()
             if (!snap || !Array.isArray(snap.loc) || !snap.loc.length) throw new Error('snapshot is empty')
+            state.sessionType = snap.type || 'Race'
             for (const d of snap.drivers || []) {
                 if (d.driver_number == null) continue
                 state.drivers[d.driver_number] = {
@@ -385,6 +422,7 @@ export function createFeed() {
             this.stop()
             sessionKey = key
             state.mode = 'live'
+            state.sessionType = type
             await loadDrivers()
             every(3000, pollLive)
         },
@@ -404,7 +442,7 @@ export function createFeed() {
         stop() {
             timers.forEach(clearInterval)
             timers = []
-            position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear()
+            position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
             state.timing = []; state.raceControl = []; state.outline = []
             state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null
         },

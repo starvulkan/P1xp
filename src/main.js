@@ -110,7 +110,7 @@ async function enterLive(session) {
   homeEl.hidden = true
   liveEl.hidden = false
   liveSession.textContent = `${session.short} \u2502 ${session.circuit}`
-  await feed.start(session.key)
+  await feed.start(session.key, session.type)
 }
 
 function leaveLive() {

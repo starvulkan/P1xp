@@ -70,6 +70,7 @@ const inWindow = (row, key = 'date') => {
 const snap = {
     session: SESSION,
     label: `${info.meeting_name} \u2503 ${info.circuit_short_name}`,
+    type: info.session_type,
     from,
     to,
     drivers: await step('drivers', `/drivers?session_key=${SESSION}`),
