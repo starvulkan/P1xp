@@ -35,6 +35,8 @@ function pickAnchor(messages, from, to) {
 
 const meta = await get(`/sessions?session_key=${SESSION}`)
 const info = meta[0]
+const meetings = await get(`/meetings?meeting_key=${info.meeting_key}`)
+const gp = (meetings[0] && meetings[0].meeting_name) || info.location || info.circuit_short_name
 if (!info) throw new Error(`no session ${SESSION}`)
 
 const sStart = new Date(info.date_start).getTime()
@@ -52,7 +54,7 @@ const from = new Date(fromMs).toISOString()
 const to = new Date(toMs).toISOString()
 const win = `&date>${from}&date<${to}`
 
-console.log(`${info.meeting_name} - ${info.session_name}`)
+console.log(`${gp} - ${info.session_name}`)
 console.log(`window ${from} → ${to}`)
 
 const step = async (label, path) => {
@@ -69,7 +71,7 @@ const inWindow = (row, key = 'date') => {
 
 const snap = {
     session: SESSION,
-    label: `${info.meeting_name} \u2503 ${info.circuit_short_name}`,
+    label: `${gp} \u2503 ${info.circuit_short_name}`,
     type: info.session_type,
     from,
     to,
