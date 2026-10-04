@@ -101,7 +101,7 @@ export async function refreshSessions(now = Date.now()) {
     const year = new Date(now).getUTCFullYear()
     try {
         const response = await fetch(`${API}/sessions?year=${year}`, { signal: AbortSignal.timeout(20_000) })
-        if (response.status === 403) { noteLiveSession(); return null }
+        if (response.status === 401 || response.status === 403) { noteLiveSession(); return null }
         if (!response.ok) throw new Error(`sessions returned ${response.status}`)
         const raw = await response.json()
         if (!Array.isArray(raw) || !raw.length) return null
@@ -113,7 +113,7 @@ export async function refreshSessions(now = Date.now()) {
             weekends = derived
             await write(CAL_KEY, { year, savedAt: now, rows: derived })
         }
-        
+
         return rows
     } catch (error) {
         console.warn('calendar: session refresh failed', error)
