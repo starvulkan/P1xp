@@ -4,7 +4,10 @@ import { normalise } from './schedule.js'
 const API = 'https://api.openf1.org/v1'
 const PAD = 12 * 60 * 60 * 1000
 const CACHE_KEY = 'sessions'
-const CACHE_TIL = 7 * 24 * 60 * 60 * 1000
+const CACHE_TTL = 30 * 24 * 60 * 60 * 1000
+const CAL_KEY = 'calendar'
+const CAL_TTL = 60 * 24 * 60 * 60 * 1000
+const LIVE_PAD = 2 * 60 * 60 * 1000
 
 let weekends = null
 let liveUntil = 0
@@ -15,9 +18,47 @@ function parseWeekend(round) {
     return { ...round, at, from: at - PAD, to: shut + PAD }
 }
 
+function weekendsFrom(rows) {
+    const meetings = new Map()
+    for (const s of rows || []) {
+        if (s.meeting == null || !Number.isFinite(s.start) || !Number.isFinite(s.end)) continue
+        const m = meetings.get(s.meeting)
+        if (!m) {
+            meetings.set(s.meeting, {
+                name: s.gp || s.country || s.circuit, country: s.country || '',
+                circuit: s.circuit || '', at: s.start, shut: s.end,
+            })
+            continue
+        }
+        if (s.start < m.at) m.at = s.start
+        if (s.end > m.shut) m.shut = s.end
+    }
+    return [...meetings.values()]
+        .map((m) => ({
+            name: m.name, country: m.country, circuit: m.circuit,
+            at: m.at, from: m.at - LIVE_PAD, to: m.shut + LIVE_PAD,
+            start: new Date(m.at).toISOString().slice(0, 10),
+            end: new Date(m.shut).toISOString().slice(0, 10),
+        }))
+        .sort((a, b) => a.from - b.from)
+}
+
+export function weekendsNow() {
+    return weekends || []
+}
+
 export async function loadWeekends(now = Date.now()) {
     if (weekends) return weekends
     const year = String(new Date(now).getUTCFullYear())
+
+    const saved = await read(CAL_KEY, null)
+    if (saved && Array.isArray(saved.rows) && saved.rows.length
+        && saved.year === Number(year)
+        && saved.savedAt && now - saved.savedAt < CAL_TTL) {
+        weekends = saved.rows
+        return weekends
+    }
+
     try {
         const response = await fetch('./calendar.json', { signal: AbortSignal.timeout(8000) })
         if (!response.ok) throw new Error(`calendar.json returned ${response.status}`)
@@ -52,7 +93,7 @@ export async function cachedSessions(now = Date.now()) {
     const entry = await read(CACHE_KEY, null)
     if (!entry || !Array.isArray(entry.rows) || !entry.rows.length) return null
     if (entry.year !== new Date(now).getUTCFullYear()) return null
-    if (!entry.savedAt || now - entry.savedAt > CACHE_TIL) return null
+    if (!entry.savedAt || now - entry.savedAt > CACHE_TTL) return null
     return entry.rows
 }
 
@@ -66,6 +107,13 @@ export async function refreshSessions(now = Date.now()) {
         if (!Array.isArray(raw) || !raw.length) return null
         const rows = raw.map(normalise).sort((a, b) => a.start - b.start)
         await write(CACHE_KEY, { year, savedAt: now, rows })
+        
+        const derived = weekendsFrom(rows)
+        if (derived.length) {
+            weekends = derived
+            await write(CAL_KEY, { year, savedAt: now, rows: derived })
+        }
+        
         return rows
     } catch (error) {
         console.warn('calendar: session refresh failed', error)

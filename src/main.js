@@ -93,7 +93,7 @@ async function loadCalendar() {
   const cached = await calendar.cachedSessions()
   if (cached) { sessions = cached; render() }
   const fresh = await calendar.refreshSessions()
-  if (fresh) { sessions = fresh; render() }
+  if (fresh) { sessions = fresh; weekends = calendar.weekendsNow(); render() }
 }
 
 function paintLive() {

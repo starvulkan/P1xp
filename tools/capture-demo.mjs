@@ -13,7 +13,10 @@ async function get(path, tries = 4) {
         if (response.status === 429) { await sleep(1500 * (i + 1)); continue }
         if (response.status === 404) return []
         if (response.status === 403) throw new Error('OpenF1 is gated right now, a session is live')
-        if (!response.ok) throw new Error(`${path} returned ${response.status}`)
+        if (!response.ok) {
+            const body = await response.text().catch(() => '')
+            throw new Error(`${path} returned ${response.status} ${body.slice(0, 300)}`)
+        }
         return response.json()
     }
     throw new Error(`gave up on ${path}`)

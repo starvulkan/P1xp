@@ -385,6 +385,7 @@ export function createFeed() {
             this.stop()
             sessionKey = key
             state.mode = 'live'
+            await loadDrivers()
             every(3000, pollLive)
         },
 
