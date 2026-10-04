@@ -106,6 +106,18 @@ export async function refreshSessions(now = Date.now()) {
         const raw = await response.json()
         if (!Array.isArray(raw) || !raw.length) return null
         const rows = raw.map(normalise).sort((a, b) => a.start - b.start)
+
+        try {
+            const meta = await fetch(`${API}/meetings?year=${year}`, { signal: AbortSignal.timeout(20_000) })
+            if (meta.ok) {
+                const names = new Map(((await meta.json()) || [])
+                    .map((m) => [m.meeting_key, m.meeting_name]))
+                for (const r of rows) if (!r.gp) r.gp = names.get(r.meeting) || r.country || ''
+            }
+        } catch (error) {
+            console.warn('calendar: meeting names unavailable', error)
+        }
+
         await write(CACHE_KEY, { year, savedAt: now, rows })
         
         const derived = weekendsFrom(rows)
