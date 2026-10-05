@@ -43,7 +43,7 @@ function drivers(data) {
         if (!Number.isFinite(number)) continue
         out.push({
             driver_number: number,
-            name_acronym: d.Tla || d.BroadcastName || '',
+            name_acronym: d.Tla || String(number) || '',
             full_name: d.FullName || d.BroadcastName || '',
             team_name: d.TeamName || '',
             team_colour: d.TeamColour || '',
@@ -114,7 +114,7 @@ function stints(data) {
 
 function control(data) {
     return rows(data && data.Messages).map((m) => ({
-        data: m.Utc,
+        date: m.Utc,
         message: m.Message || '',
         flag: m.Flag || '',
         driver_number: m.RacingNumber != null ? Number(m.RacingNumber) : null,
