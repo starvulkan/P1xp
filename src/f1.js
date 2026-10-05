@@ -1,3 +1,5 @@
+import { convert, reset as resetConvert } from './f1live.js'
+
 /* get f1 session data from openf1 */
 const API = 'https://api.openf1.org/v1'
 
@@ -142,6 +144,11 @@ export function createFeed() {
     const stint = new Map()
     const location = new Map()
     const best = new Map()
+    const seenLive = []
+    const heardLive = []
+    const seenKeys = new Set()
+    const trail = new Map()
+    let detach = null
 
     let sessionKey = null
     let timers = []
@@ -410,6 +417,59 @@ export function createFeed() {
         }
     }
 
+    function applyLive(topic, data) {
+        const out = convert(topic, data)
+        if (out.sessionType) state.sessionType = out.sessionType
+        if (out.trackStatus) state.trackStatus = out.trackStatus
+        for (const d of out.drivers || []) {
+            state.drivers[d.driver_number] = {
+                number: d.driver_number,
+                abbr: d.name_acronym || String(d.driver_number),
+                name: d.full_name || '',
+                team: d.team_name || '',
+                colour: d.team_colour || '',
+            }
+        }
+        for (const r of out.pos || []) newest(position, r, 'date')
+        for (const r of out.iv || []) newest(interval, r, 'date')
+        for (const r of out.laps || []) newest(lap, r, 'date_start')
+        for (const r of out.best || []) fastest(best, r)
+        for (const s of out.stints || []) stint.set(s.driver_number, s)
+        for (const r of out.loc || []) {
+            newest(location, r, 'date')
+            const path = trail.get(r.driver_number) || []
+            path.push([r.x, r.y])
+            if (path.length > 1200) path.shift()
+            trail.set(r.driver_number, path)
+        }
+        let longest = null
+        for (const path of trail.values()) if (!longest || path.length > longest.length) longest = path
+        if (longest && longest.length >= 50) state.outline = longest
+        if (out.weather) state.weather = out.weather
+
+        let fresh = false
+        for (const m of out.rc || []) {
+            const key = `${m.date}|${m.message}`
+            if (seenKeys.has(key)) continue
+            seenKeys.add(key); seenLive.push(m); fresh = true
+        }
+        if (fresh) {
+            state.raceControl = seenLive.slice()
+                .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 40)
+            state.penalties = penaltiesFrom(seenLive)
+        }
+        for (const r of out.radio || []) {
+            const key = `r|${r.recording_url}`
+            if (seenKeys.has(key)) continue
+            seenKeys.add(key); heardLive.unshift(r)
+        }
+        heardLive.length = Math.min(heardLive.length, 25)
+        state.radio = heardLive.slice()
+
+        state.clock = Date.now()
+        rebuild()
+    }
+
     function every(ms, fn) {
         fn()
         timers.push(setInterval(fn, ms))
@@ -417,6 +477,23 @@ export function createFeed() {
 
     return {
         state,
+
+        liveReady() {
+            return typeof window !== 'undefined' && !!(window.p1xp && window.p1xp.startLive)
+        },
+
+        async startLiveFeed(type = 'Race') {
+            this.stop()
+            state.mode = 'live'
+            state.sessionType = type
+            resetConvert()
+            if (!this.liveReady()) return false
+            detach = window.p1xp.onLiveMessage((payload) => {
+                if (payload && payload.topic) applyLive(payload.topic, payload.data)
+            })
+            await window.p1xp.startLive()
+            return true
+        },
 
         async start(key, type = 'Race') {
             this.stop()
@@ -442,6 +519,9 @@ export function createFeed() {
         stop() {
             timers.forEach(clearInterval)
             timers = []
+            if (detach) { detach(); detach = null }
+            if (typeof window !== 'undefined' && window.p1xp && window.p1xp.stopLive) window.p1xp.stopLive()
+            seenLive.length = 0; heardLive.length = 0; seenKeys.clear(); trail.clear()
             position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
             state.timing = []; state.raceControl = []; state.outline = []
             state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null
