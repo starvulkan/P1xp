@@ -3,6 +3,7 @@ const path = require('node:path')
 const live = require('./live.cjs')
 
 const DEV = process.argv.includes('--dev')
+const RECORD = process.argv.includes('--record')
 let win = null
 
 function create() {
@@ -41,7 +42,13 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.handle('live:start', async () => live.start((topic, data) => {
-    if (win && !win.isDestroyed()) win.webContents.send('live:message', { topic, data })
-}))
+ipcMain.handle('live:start', async () => {
+    const file = RECORD
+        ? path.join(app.getPath('userData'), `live-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`)
+        : null
+    return live.start((topic, data) => {
+        if (win && !win.isDestroyed()) win.webContents.send('live:message', { topic, data })
+    }, file)
+})
+
 ipcMain.handle('live:stop', async () => live.stop())

@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "electron": "npm run build && electron electron/main.cjs",
-    "electron:dev": "electron electron/main.cjs --dev"
+    "electron:dev": "electron electron/main.cjs --dev",
+    "electron:record": "npm run build && electron electron/main.cjs --record"
   },
   "devDependencies": {
     "electron": "^44.5.1",

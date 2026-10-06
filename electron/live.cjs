@@ -4,6 +4,7 @@ const WebSocket = require('ws')
 const NEGOTIATE = 'https://livetiming.formula1.com/signalrcore/negotiate'
 const SOCKET = 'wss://livetiming.formula1.com/signalrcore'
 const RS = '\u001e'
+const fs = require('node:fs')
 
 const TOPICS = [
     'Heartbeat', 'SessionInfo', 'SessionStatus', 'TrackStatus', 'LapCount',
@@ -11,8 +12,23 @@ const TOPICS = [
     'WeatherData', 'RaceControlMessages', 'TeamRadio', 'Position.z',
 ]
 
+const LIMIT = 40 * 1024 * 1024
+
 let socket = null
 let ping = null
+let log = null
+let written = 0
+
+function record(text) {
+    if (!log) return
+    const line = JSON.stringify({ t: Date.now(), raw: text }) + '\n'
+    written += line.length
+    log.write(line)
+    if (written >= LIMIT) {
+        console.warn('live: recording limit reached, stopping capture')
+        log.end(); log = null
+    }
+}
 
 function inflate(value) {
     const raw = zlib.inflateRawSync(Buffer.from(value, 'base64')).toString('utf8')
@@ -68,6 +84,11 @@ function handle(text, emit) {
 
 async function start(emit) {
     stop()
+    if (recordTo) {
+        log = fs.createWriteStream(recordTo, { flags: 'a' })
+        written = 0
+        console.log('live: recording raw frames to', recordTo)
+    }
     const jar = await cookie()
     socket = new WebSocket(SOCKET, { headers: jar ? { Cookie: jar } : {} })
 
@@ -76,7 +97,11 @@ async function start(emit) {
         send({ type: 1, target: 'Subscribe', arguments: [TOPICS], invocationId: '1' })
         ping = setInterval(() => send({ type: 6 }), 15_000)
     })
-    socket.on('message', (buffer) => handle(buffer.toString('utf8'), emit))
+    socket.on('message', (buffer) => {
+        const text = buffer.toString('utf8')
+        record(text)
+        handle(text, emit)
+    })
     socket.on('error', (error) => console.warn('live:', error.message))
     socket.on('close', () => { clearInterval(ping); ping = null })
 
@@ -85,8 +110,9 @@ async function start(emit) {
 
 function stop() {
     clearInterval(ping); ping = null
+    if (log) { log.end(); log = null }
     if (socket) { try { socket.close() } catch {} socket = null }
     return true
 }
 
-module.exports = { start, stop, decode, TOPICS }
+module.exports = { start, stop, decode, handle, TOPICS }
