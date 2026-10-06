@@ -24,6 +24,7 @@ const weekendList = document.querySelector('#weekend-list')
 
 const homeEl = document.querySelector('#home')
 const liveEl = document.querySelector('#live')
+const feedEl = document.querySelector('#live-feed')
 const liveSession = document.querySelector('#live-session')
 const liveClock = document.querySelector('#live-clock')
 const liveWeather = document.querySelector('#live-weather')
@@ -96,7 +97,43 @@ async function loadCalendar() {
   if (fresh) { sessions = fresh; weekends = calendar.weekendsNow(); render() }
 }
 
+function paintFeed() {
+  if (!feedEl) return
+  const using = feed.state.mode === 'live' && feed.liveReady()
+  feedEl.hidden = !using
+  if (!using) return
+
+  const info = feed.state.feed || { state: 'connecting', detail: '' }
+  const silent = feed.state.feedAt ? Date.now() - feed.state.feedAt : Infinity
+  let tag = 'wait'
+  let text = 'Connecting'
+
+  if (info.state === 'error') {
+    tag = 'error'
+    text = info.detail ? `Feed error \u2502 ${info.detail}` : 'Feed error'
+  } else if (info.state === 'retry') {
+    tag = "error"
+    text = `Reconnecting in ${info.detail}`
+  } else if (info.state === 'closed') {
+    tag = 'error'
+    text = 'Feed dropped'
+  } else if (feed.state.feedAt && silent < 15_000) {
+    tag = 'live'
+    text = 'Live feed'
+  } else if (feed.state.feedAt) {
+    tag = 'stale'
+    text = `No data ${Math.round(silent / 1000)}s`
+  } else if (info.state === 'subscribed') {
+    tag = 'wait'
+    text = 'Waiting for data'
+  }
+
+  feedEl.dataset.feed = tag
+  feedEl.textContent = text
+}
+
 function paintLive() {
+  paintFeed()
   renderTower(feed.state, favourite)
   renderRadio(feed.state, favourite)
   liveWeather.textContent = fmtWeather(feed.state.weather)

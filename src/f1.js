@@ -132,6 +132,8 @@ export function createFeed() {
         weather: null,
         mode: 'live',
         sessionType: 'Race',
+        feed: null,
+        feedAt: 0,
         loading: false,
         progress: '',
         clock: 0,
@@ -418,6 +420,12 @@ export function createFeed() {
     }
 
     function applyLive(topic, data) {
+        if (topic === '__status') {
+            state.feed = { state: (data && data.state) || 'idle', detail: (data && data.detail) || '', at: Date.now() }
+            return 
+        }
+        state.feedAt = Date.now()
+        
         const out = convert(topic, data)
         if (out.sessionType) state.sessionType = out.sessionType
         if (out.trackStatus) state.trackStatus = out.trackStatus
@@ -486,6 +494,10 @@ export function createFeed() {
             this.stop()
             state.mode = 'live'
             state.sessionType = type
+
+            state.feed = null
+            state.feedAt = 0
+
             resetConvert()
             if (!this.liveReady()) return false
             detach = window.p1xp.onLiveMessage((payload) => {

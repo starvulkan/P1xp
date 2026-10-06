@@ -528,6 +528,34 @@ body {
   background: #FF9F1C;
 }
 
+.live__feed {
+  margin: 0;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0B0D10;
+  background: var(--muted);
+}
+
+.live__feed[data-feed="live"] {
+  background: #36C77E;
+}
+
+.live__feed[data-feed="wait"] {
+  background: #FFD21E;
+}
+
+.live__feed[data-feed="stale"] {
+  background: #FF9F1C;
+}
+
+.live__feed[data-feed="error"] {
+  background: #FF2D2D;
+  color: #FFFFFF;
+}
+
 .live__status[data-status="red"] { 
   background: #FF2D2D; 
   color: #FFFFFF; 

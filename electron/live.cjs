@@ -18,6 +18,9 @@ let socket = null
 let ping = null
 let log = null
 let written = 0
+let wanted = false
+let tries = 0
+let retry = null
 
 function record(text) {
     if (!log) return
@@ -82,19 +85,36 @@ function handle(text, emit) {
     }
 }
 
-async function start(emit, recordTo = null) {
-    stop()
-    if (recordTo) {
-        log = fs.createWriteStream(recordTo, { flags: 'a' })
-        written = 0
-        console.log('live: recording raw frames to', recordTo)
+function status(emit, state, detail = '') {
+    emit('__status', { state, detail })
+}
+
+function later(emit) {
+    if (!wanted || retry) return
+    const wait = Math.min(30_000, 2000 * 2 ** tries)
+    tries += 1
+    status(emit, 'retry', `${Math.round(wait / 1000)}s`)
+    retry = setTimeout(() => { retry = null; open(emit) }, wait)
+}
+
+async function open(emit) {
+    status(emit, 'connecting')
+    let jar = null
+    try {
+        jar = await cookie()
+    } catch (error) {
+        status(emit, 'error', error.message)
+        later(emit)
+        return
     }
-    const jar = await cookie()
+
     socket = new WebSocket(SOCKET, { headers: jar ? { Cookie: jar } : {} })
 
     socket.on('open', () => {
+        tries = 0
         socket.send(JSON.stringify({ protocol: 'json', version: 1 }) + RS)
         send({ type: 1, target: 'Subscribe', arguments: [TOPICS], invocationId: '1' })
+        status(emit, 'subscribed')
         ping = setInterval(() => send({ type: 6 }), 15_000)
     })
     socket.on('message', (buffer) => {
@@ -102,13 +122,33 @@ async function start(emit, recordTo = null) {
         record(text)
         handle(text, emit)
     })
-    socket.on('error', (error) => console.warn('live:', error.message))
-    socket.on('close', () => { clearInterval(ping); ping = null })
+    socket.on('error', (error) => {
+        console.warn('live:', error.message)
+        status(emit, 'error', error.message)
+    })
+    socket.on('close', () => {
+        clearInterval(ping); ping = null
+        socket = null
+        if (wanted) { status(emit, 'closed'); later(emit) }
+    })
+}
 
+async function start(emit, recordTo = null) {
+    stop()
+    if (recordTo) {
+        log = fs.createWriteStream(recordTo, { flags: 'a' })
+        written = 0
+        console.log('live: recording raw frames to', recordTo)
+    }
+    wanted = true
+    tries = 0
+    await open(emit)
     return true
 }
 
 function stop() {
+    wanted = false
+    clearTimeout(retry); retry = null
     clearInterval(ping); ping = null
     if (log) { log.end(); log = null }
     if (socket) { try { socket.close() } catch {} socket = null }
