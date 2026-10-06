@@ -82,7 +82,7 @@ function handle(text, emit) {
     }
 }
 
-async function start(emit) {
+async function start(emit, recordTo = null) {
     stop()
     if (recordTo) {
         log = fs.createWriteStream(recordTo, { flags: 'a' })
