@@ -5,7 +5,10 @@
   "description": "Experience F1 as never before.",
   "homepage": "https://starvulkan.github.io/P1xp/",
   "author": "starvulkan",
-  "repository": { "type": "git", "url": "https://github.com/starvulkan/P1xp.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/starvulkan/P1xp.git"
+  },
   "main": "electron/main.cjs",
   "type": "module",
   "desktopName": "p1xp.desktop",
@@ -25,13 +28,30 @@
     "productName": "P1XP",
     "copyright": "Copyright (c) 2026 starvulkan",
     "publish": null,
-    "directories": { "output": "release", "buildResources": "build" },
-    "files": ["dist/**", "electron/**", "package.json"],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
     "afterPack": "build/adhoc-sign.cjs",
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "nsis": {
@@ -39,12 +59,22 @@
       "allowToChangeInstallationDirectory": true,
       "artifactName": "P1XP-${version}-setup.${ext}"
     },
-    "portable": { "artifactName": "P1XP-${version}-portable.${ext}" },
+    "portable": {
+      "artifactName": "P1XP-${version}-portable.${ext}"
+    },
     "mac": {
       "category": "public.app-category.sports",
       "identity": null,
       "hardenedRuntime": false,
-      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "artifactName": "P1XP-${version}-mac-${arch}.${ext}"
     },
     "linux": {
@@ -52,20 +82,32 @@
       "synopsis": "F1 race-weekend companion",
       "syncDesktopName": true,
       "target": [
-        { "target": "AppImage", "arch": ["x64"] },
-        { "target": "deb", "arch": ["x64"] }
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "artifactName": "P1XP-${version}-linux-${arch}.${ext}"
     },
-    "deb": { "maintainer": "starvulkan <starvulkan@users.noreply.github.com>" }
+    "deb": {
+      "maintainer": "starvulkan <starvulkan@users.noreply.github.com>"
+    }
   },
   "devDependencies": {
-    "@fontsource/inter": "^5.3.0",
     "electron": "^44.5.1",
     "electron-builder": "^26.15.3",
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
     "ws": "^8.22.0"
   }
 }
