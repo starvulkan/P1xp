@@ -38,17 +38,3 @@ export function paint(hex) {
     const fill = normaliseHex(hex)
     return { fill, ink: contrastOn(fill) }
 }
-
-export function paintTeam(key) {
-    return paint(F1TEAMS[key] ? F1TEAMS[key].primary : FALLBACK)
-}
-
-export function teamByName(name) {
-  if (!name) return null
-  const needle = String(name).toLowerCase().replace(/[^a-z]/g, '')
-  for (const [key, team] of Object.entries(F1TEAMS)) {
-    const plain = team.name.toLowerCase().replace(/[^a-z]/g, '')
-    if (needle.includes(plain) || plain.includes(needle)) return { key, ...team }
-  }
-  return null
-}

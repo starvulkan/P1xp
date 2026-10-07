@@ -5,15 +5,13 @@ import './style.css'
 import * as theme from './theme.js'
 import * as setup from './setup.js'
 import * as schedule from './schedule.js'
-import { paint } from './teams.js'
 import * as tracks from './tracks.js'
 import * as trackmap from './trackmap.js'
 import * as tower from './tower.js'
 import * as radio from './radio.js'
 import { createFeed, fmtWeather, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 import * as calendar from './calendar.js'
-
-const API = 'https://api.openf1.org/v1'
+import * as roster from './roster.js'
 
 const nextLabel = document.querySelector('#next-label')
 const meetingName = document.querySelector('#meeting-name')
@@ -22,6 +20,7 @@ const nextTime = document.querySelector('#next-time')
 const nextWhen = document.querySelector('#next-when')
 const weekendList = document.querySelector('#weekend-list')
 
+const wizardEl = document.querySelector('#wizard')
 const homeEl = document.querySelector('#home')
 const liveEl = document.querySelector('#live')
 const feedEl = document.querySelector('#live-feed')
@@ -51,37 +50,6 @@ const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
   scrimEl: document.querySelector('#hero-scrim'),
 })
-
-async function getJSON(path) {
-  try {
-    const response = await fetch(`${API}${path}`, { signal: AbortSignal.timeout(10_000) })
-    if (!response.ok) throw new Error(`${path} returned ${response.status}`)
-    return await response.json()
-  } catch (error) {
-    console.warn('openf1:', error)
-    return null
-  }
-}
-
-async function fetchDrivers() {
-  const list = await getJSON('/drivers?session_key=latest')
-  if (!Array.isArray(list)) return []
-  const seen = new Set()
-  return list
-    .filter((d) => {
-      if (!d.driver_number || seen.has(d.driver_number)) return false
-      seen.add(d.driver_number)
-      return true
-    })
-    .sort((a, b) => a.driver_number - b.driver_number)
-    .map((d) => ({
-      number: d.driver_number,
-      abbr: d.name_acronym || String(d.driver_number),
-      name: d.full_name || '',
-      team: d.team_name || '',
-      colour: paint(d.team_colour).fill,
-    }))
-}
 
 function render() {
   renderWeekend()
@@ -267,7 +235,7 @@ async function start() {
   await theme.init()
 
   const openSetup = setup.mount({
-    rootEl: document.querySelector('#wizard'),
+    rootEl: wizardEl,
     teamsEl: document.querySelector('#setup-teams'),
     driversEl: document.querySelector('#setup-drivers'),
     tiersEl: document.querySelector('#setup-tiers'),
@@ -275,11 +243,16 @@ async function start() {
     nextEl: document.querySelector('#setup-next'),
     backEl: document.querySelector('#setup-back'),
     doneEl: document.querySelector('#setup-done'),
-    fetchDrivers,
+    fetchDrivers: roster.load,
   })
   document.querySelector('#setup-open').addEventListener('click', openSetup)
   document.querySelector('#demo-open').addEventListener('click', startDemo)
   document.querySelector('#replay-exit').addEventListener('click', stopDemo)
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !wizardEl.hidden) return
+    if (demo) stopDemo()
+  })
 
   for (const [id, url] of [
     ['#open-stream', 'https://f1tv.formula1.com/'],
