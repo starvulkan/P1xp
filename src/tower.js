@@ -56,7 +56,7 @@ export function mount({ listEl, statusEl, feedEl }) {
         const labels = {
             green: 'Track clear', yellow: 'Yellow flag', vsc: 'Virtual Safety Car',
             sc: 'Safety Car', red: 'Red flag',
-            delayed: 'Session delayed', waiting: 'Waiting to start',
+            delayed: 'Session delayed', waiting: 'Waiting to start', finished: 'Session finished',
         }
         const status = statusOf(state)
 

@@ -5,10 +5,12 @@ const FLAGS = {
 }
 
 const lines = new Map()
+const people = new Map()
 let sessionPath = ''
 
 export function reset() {
     lines.clear()
+    people.clear()
     sessionPath = ''
 }
 
@@ -48,13 +50,18 @@ function drivers(data) {
     for (const [key, d] of Object.entries(data || {})) {
         const number = Number(d && d.RacingNumber ? d.RacingNumber : key)
         if (!Number.isFinite(number)) continue
-        out.push({
+        
+        const prev = people.get(number) || {}
+        const next = {
             driver_number: number,
-            name_acronym: d.Tla || String(number) || '',
-            full_name: d.FullName || d.BroadcastName || '',
-            team_name: d.TeamName || '',
-            team_colour: d.TeamColour || '',
-        })
+            name_acronym: d.Tla || prev.name_acronym || String(number),
+            full_name: d.FullName || d.BroadcastName || prev.full_name || '',
+            team_name: d.TeamName || prev.team_name || '',
+            team_colour: d.TeamColour || prev.team_colour || '',
+        }
+
+        people.set(number, next)
+        out.push(next)
     }
     return out
 }

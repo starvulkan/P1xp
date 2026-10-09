@@ -9,7 +9,7 @@ const fs = require('node:fs')
 const TOPICS = [
     'Heartbeat', 'SessionInfo', 'SessionStatus', 'TrackStatus', 'LapCount',
     'DriverList', 'TimingData', 'TimingAppData', 'TimingStats',
-    'WeatherData', 'RaceControlMessages', 'TeamRadio', 'Position.z',
+    'WeatherData', 'RaceControlMessages', 'TeamRadio', 'Position', 'Position.z',
 ]
 
 const LIMIT = 40 * 1024 * 1024

@@ -538,6 +538,11 @@ body {
   color: #0B0D10;
 }
 
+.live__status[data-status="finished"] {
+  background: var(--muted);
+  color: #0B0D10;
+}
+
 .live__feed {
   margin: 0;
   padding: 0.35rem 0.9rem;

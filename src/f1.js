@@ -122,6 +122,7 @@ function penaltiesFrom(messages) {
 
 const DELAYED = /DELAY|SUSPEND|POSTPON|WILL NOT (RESUME|START|RESTART)|NOT BEFORE|(RESUM|RESTART|START)\w* AT/i
 const RECENT = 20 * 60 * 1000
+export const OVER = new Set(['Finished', 'Finalised', 'Ends'])
 
 function freshNotices(state, now) {
     return (state.raceControl || []).filter((m) => {
@@ -144,6 +145,7 @@ export function statusOf(state, now = Date.now()) {
     if (state.sessionState === 'Started') return state.trackStatus || 'green'
 
     if (delayNotice(state, now)) return 'delayed'
+    if (OVER.has(state.sessionState)) return 'finished'
     if (state.sessionState) return 'waiting'
 
     return state.trackStatus || 'green'

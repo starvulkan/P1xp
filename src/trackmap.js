@@ -61,7 +61,7 @@ export function mount(rootEl) {
 
     const marks = new Map()
     let project = null
-    let drawn = false
+    let drawnKey = null
 
     function markFor(number) {
         if (marks.has(number)) return marks.get(number)
@@ -78,37 +78,49 @@ export function mount(rootEl) {
         cars.append(g)
         marks.set(number, { g, dot, label })
         return marks.get(number)
-  }
+    }
 
-  return function render(state, favourite) {
-    if (!drawn) {
-        if (!state.outline || state.outline.length < 50) return false
-        const box = bounds(state.outline)
+    function draw(points, key) {
+        const box = bounds(points)
         if (!box) return false
+
         project = projector(box)
-        track.setAttribute('d', buildPath(simplify(state.outline), project))
+        track.setAttribute('d', buildPath(simplify(points), project))
         rootEl.textContent = ''
         rootEl.append(svg)
-        drawn = true
+        drawnKey = key
+
+        return true
     }
 
-    const seen = new Set()
-    for (const [number, car] of Object.entries(state.locations || {})) {
-        if (!Number.isFinite(car.x)) continue
-        seen.add(number)
-        const { g, dot, label } = markFor(number)
-        const [x, y] = project([car.x, car.y])
-        g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`)
-        const { fill, ink } = paint(car.colour)
-        g.style.setProperty('--dot', fill)
-        g.style.setProperty('--dot-ink', ink)
-        g.classList.toggle('map__car--fav', String(number) === String(favourite))
-        label.textContent = car.abbr
-        dot.setAttribute('r', String(number) === String(favourite) ? '20' : '15')
+    return function render(state, favourite, layout) {
+        const bundled = layout && Array.isArray(layout.points) && layout.points.length >= 50
+        const live = Array.isArray(state.outline) && state.outline.length >= 50
+
+        const points = live ? state.outline : (bundled ? layout.points : null)
+        if (!points) { drawnKey = null; return false }
+
+        const key = `${(layout && layout.key) || 'none'}:${live ? 'live' : 'bundled'}`
+        if (drawnKey !== key && !draw(points, key)) return false
+
+        const seen = new Set()
+        for (const [number, car] of Object.entries(state.locations || {})) {
+            if (!Number.isFinite(car.x)) continue
+            seen.add(number)
+            const { g, dot, label } = markFor(number)
+            const [x, y] = project([car.x, car.y])
+            g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`)
+            const { fill, ink } = paint(car.colour)
+            g.style.setProperty('--dot', fill)
+            g.style.setProperty('--dot-ink', ink)
+            g.classList.toggle('map__car--fav', String(number) === String(favourite))
+            label.textContent = car.abbr
+            dot.setAttribute('r', String(number) === String(favourite) ? '20' : '15')
+        }
+        for (const [number, mark] of marks) {
+            if (!seen.has(number)) { mark.g.remove(); marks.delete(number) }
+        }
+
+        return true
     }
-    for (const [number, mark] of marks) {
-        if (!seen.has(number)) { mark.g.remove(); marks.delete(number) }
-    }
-    return true
-  }
-}
+}    

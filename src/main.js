@@ -9,7 +9,7 @@ import * as tracks from './tracks.js'
 import * as trackmap from './trackmap.js'
 import * as tower from './tower.js'
 import * as radio from './radio.js'
-import { createFeed, fmtWeather, DEMO_SESSION, DEMO_SPEED } from './f1.js'
+import { createFeed, fmtWeather, OVER, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 import * as calendar from './calendar.js'
 import * as roster from './roster.js'
 
@@ -45,6 +45,8 @@ let weekends = []
 let liveKey = null
 let favourite = null
 let demo = false
+let layout = null
+const finished = new Set()
 
 const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
@@ -54,6 +56,24 @@ const applyTrack = tracks.mount({
 function render() {
   renderWeekend()
   renderCountdown()
+}
+
+async function loadLayout(session) {
+  const slug = tracks.slugFor(session)
+  if (!slug) { layout = null; return }
+  if (layout && layout.key === slug) return
+
+  layout = { key: slug, points: null }
+
+  try {
+    const response = await fetch(`./outlines/${slug}.json`, { signal: AbortSignal.timeout(10_000) })
+     if (!response.ok) throw new Error(`outline returned ${response.status}`)
+
+    const file = await response.json()
+    if (Array.isArray(file.points) && file.points.length >= 50) layout = { key: slug, points: file.points }
+  } catch (error) {
+    console.warn('map: no bundled outline for', slug, error)
+  }
 }
 
 async function loadCalendar() {
@@ -111,13 +131,14 @@ function paintLive() {
   renderTower(feed.state, favourite)
   renderRadio(feed.state, favourite)
   liveWeather.textContent = fmtWeather(feed.state.weather)
-  if (renderMap(feed.state, favourite)) mapEl.classList.add('map--live')
+  if (renderMap(feed.state, favourite, layout)) mapEl.classList.add('map--live')
 }
 
 async function enterLive(session) {
   if (liveKey === session.key) return
   liveKey = session.key
   favourite = await setup.currentDriver()
+  await loadLayout(session)
   homeEl.hidden = true
   liveEl.hidden = false
   liveSession.textContent = `${session.short} \u2502 ${session.circuit}`
@@ -137,6 +158,7 @@ function leaveLive() {
 async function startDemo() {
   demo = true
   favourite = await setup.currentDriver()
+  await loadLayout({ circuit: 'Silverstone', country: 'United Kingdom' })
   homeEl.hidden = true
   liveEl.hidden = false
   replayBar.hidden = false
@@ -152,6 +174,15 @@ function stopDemo() {
   liveEl.hidden = true
   homeEl.hidden = false
   mapEl.classList.remove('map--live')
+}
+
+function sessionOver(pick) {
+  if (!pick.slack) return false
+  if (finished.has(pick.session.key)) return true
+  if (!OVER.has(feed.state.sessionState)) return false
+
+  finished.add(pick.session.key)
+  return true
 }
 
 function liveClockText(pick, now) {
@@ -174,7 +205,10 @@ function renderCountdown() {
       return
   }
 
-  const pick = calendar.targetFrom(sessions, weekends, now)
+  let pick = calendar.targetFrom(sessions, weekends, now)
+  if (pick.kind === 'live' && sessionOver(pick)) {
+    pick = calendar.targetFrom(sessions.filter((s) => !finished.has(s.key)), weekends, now)
+  }
 
   if (pick.kind === 'live') {
     enterLive(pick.session)
