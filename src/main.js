@@ -9,7 +9,7 @@ import * as tracks from './tracks.js'
 import * as trackmap from './trackmap.js'
 import * as tower from './tower.js'
 import * as radio from './radio.js'
-import { createFeed, fmtWeather, OVER, DEMO_SESSION, DEMO_SPEED } from './f1.js'
+import { createFeed, fmtWeather, OVER, DONE, ONE_SHOT, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 import * as calendar from './calendar.js'
 import * as roster from './roster.js'
 
@@ -47,6 +47,9 @@ let favourite = null
 let demo = false
 let layout = null
 const finished = new Set()
+const GRACE = 12 * 60 * 1000
+let pendingEnd = 0
+let holding = null
 
 const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
@@ -177,9 +180,21 @@ function stopDemo() {
 }
 
 function sessionOver(pick) {
-  if (!pick.slack) return false
+  if (!pick.slack) { pendingEnd = 0; return false }
   if (finished.has(pick.session.key)) return true
-  if (!OVER.has(feed.state.sessionState)) return false
+
+  const state = feed.state.sessionState
+  const part = feed.state.sessionPart
+  const segmented = part > 0 || !ONE_SHOT.has(feed.state.sessionType)
+
+  if (DONE.has(state)) { finished.add(pick.session.key); return true }
+  if (state !== 'Finished') { pendingEnd = 0; return false }
+
+  if (!segmented || part >= 3) { finished.add(pick.session.key); return true }
+  if (part > 0) { pendingEnd = 0; return false }
+
+  if (!pendingEnd) pendingEnd = Date.now()
+  if (Date.now() - pendingEnd < GRACE) return false
 
   finished.add(pick.session.key)
   return true
@@ -206,16 +221,19 @@ function renderCountdown() {
   }
 
   let pick = calendar.targetFrom(sessions, weekends, now)
-  if (pick.kind === 'live' && sessionOver(pick)) {
-    pick = calendar.targetFrom(sessions.filter((s) => !finished.has(s.key)), weekends, now)
+  
+  const heard = feed.state.sessionState
+  if (pick.kind !== 'live' && holding && heard && heard !== 'Inactive' && !finished.has(holding.session.key)) {
+    pick = holding
   }
 
   if (pick.kind === 'live') {
-    enterLive(pick.session)
-    liveClock.textContent = liveClockText(pick, now)
-    paintLive()
-  } else {
-    leaveLive()
+    if (sessionOver(pick)) {
+      holding = null
+      pick = calendar.targetFrom(sessions.filter((s) => !finished.has(s.key)), weekends, now)
+    } else {
+      holding = pick
+    }
   }
 
   if (pick.kind === 'none') {

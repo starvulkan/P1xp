@@ -104,7 +104,7 @@ function timing(data, stamp) {
         }
         if (patch.best != null) best.push({ driver_number: number, lap_duration: state.best })
     }
-    return { pos, iv, laps, best }
+    return { pos, iv, laps, best, part: data && data.SessionPart != null ? Number(data.SessionPart) : null }
 }
 
 function stints(data) {

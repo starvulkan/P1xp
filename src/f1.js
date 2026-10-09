@@ -123,6 +123,8 @@ function penaltiesFrom(messages) {
 const DELAYED = /DELAY|SUSPEND|POSTPON|WILL NOT (RESUME|START|RESTART)|NOT BEFORE|(RESUM|RESTART|START)\w* AT/i
 const RECENT = 20 * 60 * 1000
 export const OVER = new Set(['Finished', 'Finalised', 'Ends'])
+export const DONE = new Set(['Finalised', 'Ends'])
+export const ONE_SHOT = new Set(['Race', 'Sprint', 'Practice'])
 
 function freshNotices(state, now) {
     return (state.raceControl || []).filter((m) => {
@@ -165,6 +167,7 @@ export function createFeed() {
         mode: 'live',
         sessionType: 'Race',
         sessionState: '',
+        sessionPart: 0,
         sessionStateAt: 0,
         skew: 0,
         feed: null,
@@ -472,6 +475,7 @@ export function createFeed() {
             state.sessionState = out.sessionState
             state.sessionStateAt = Date.now()
         }
+        if (Number.isFinite(out.part)) state.sessionPart = out.part
         for (const d of out.drivers || []) {
             state.drivers[d.driver_number] = {
                 number: d.driver_number,
@@ -579,7 +583,7 @@ export function createFeed() {
             seenLive.length = 0; heardLive.length = 0; seenKeys.clear(); trail.clear()
             position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
             state.timing = []; state.raceControl = []; state.outline = []
-            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0
+            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0; state.sessionPart = 0
         },
     }
 }

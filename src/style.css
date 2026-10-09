@@ -6,6 +6,7 @@
   --line: #23272F;
   --fg: #F3F4F6;
   --muted: #7C838D;
+  --track: #D8DCE2;
 
   --team: #E8002D;
   --team-2: #FFF200;
@@ -845,7 +846,7 @@ body {
 
 .map__track {
   fill: none;
-  stroke: var(--line);
+  stroke: var(--track);
   stroke-width: 14;
   stroke-linejoin: round;
   stroke-linecap: round;
