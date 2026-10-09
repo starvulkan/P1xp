@@ -1,5 +1,5 @@
 import { paint } from './teams.js'
-import { fmtLap, fmtGap } from './f1.js'
+import { fmtLap, fmtGap, statusOf, delayNotice } from './f1.js'
 
 export function mount({ listEl, statusEl, feedEl }) {
     const rows = new Map()
@@ -52,10 +52,17 @@ export function mount({ listEl, statusEl, feedEl }) {
         }
     }
 
-    function renderStatus(status) {
-        const labels = { green: 'Track clear', yellow: 'Yellow flag', vsc: 'Virtual Safety Car', sc: 'Safety Car', red: 'Red flag' }
+    function renderStatus(state) {
+        const labels = {
+            green: 'Track clear', yellow: 'Yellow flag', vsc: 'Virtual Safety Car',
+            sc: 'Safety Car', red: 'Red flag',
+            delayed: 'Session delayed', waiting: 'Waiting to start',
+        }
+        const status = statusOf(state)
+
         statusEl.dataset.status = status
         statusEl.textContent = labels[status] || labels.green
+        statusEl.title = status === 'delayed' ? delayNotice(state) : ''
     }
 
     function renderFeed(messages) {
@@ -78,7 +85,7 @@ export function mount({ listEl, statusEl, feedEl }) {
 
     return function render(state, favourite) {
         renderTiming(state.timing, favourite)
-        renderStatus(state.trackStatus)
+        renderStatus(state)
         renderFeed(state.raceControl)
     }
 }

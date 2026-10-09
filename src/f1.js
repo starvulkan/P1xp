@@ -1,12 +1,13 @@
 import { convert, reset as resetConvert } from './f1live.js'
 
-/* get f1 session data from openf1 */
+/* get f1 session data from openf1 but back it up too cuz its annoying */
 const API = 'https://api.openf1.org/v1'
 
 export const DEMO_SESSION = 9947
 export const DEMO_SPEED = 3
 export const DEMO_WINDOW_MIN = 10
 const SNAPSHOT = './demo.json'
+const RACES = new Set(['Race', 'Sprint'])
 
 export const COMPOUND = {
     SOFT: 'S', MEDIUM: 'M', HARD: 'H', INTERMEDIATE: 'I', WET: 'W',
@@ -119,6 +120,35 @@ function penaltiesFrom(messages) {
     return out
 }
 
+const DELAYED = /DELAY|SUSPEND|POSTPON|WILL NOT (RESUME|START|RESTART)|NOT BEFORE|(RESUM|RESTART|START)\w* AT/i
+const RECENT = 20 * 60 * 1000
+
+function freshNotices(state, now) {
+    return (state.raceControl || []).filter((m) => {
+        if (!DELAYED.test(m.message || '')) return false
+        const at = Date.parse(m.date)
+        return Number.isFinite(at) && now - at <= RECENT
+    })
+}
+
+export function delayNotice(state, now = Date.now()) {
+    if (state.mode !== 'live') return ''
+    const hit = freshNotices(state, now)[0]
+
+    return hit ? hit.message : ''
+}
+
+export function statusOf(state, now = Date.now()) {
+    if (state.trackStatus === 'red') return 'red'
+    if (state.sessionState === 'Aborted') return 'delayed'
+    if (state.sessionState === 'Started') return state.trackStatus || 'green'
+
+    if (delayNotice(state, now)) return 'delayed'
+    if (state.sessionState) return 'waiting'
+
+    return state.trackStatus || 'green'
+}
+
 export function createFeed() {
     const state = {
         drivers: {},
@@ -132,6 +162,9 @@ export function createFeed() {
         weather: null,
         mode: 'live',
         sessionType: 'Race',
+        sessionState: '',
+        sessionStateAt: 0,
+        skew: 0,
         feed: null,
         feedAt: 0,
         loading: false,
@@ -175,7 +208,7 @@ export function createFeed() {
     }
 
     function rebuild() {
-        const timed = state.sessionType !== 'Race'
+        const timed = !RACES.has(state.sessionType)
         const rows = []
         const numbers = timed
             ? [...new Set([...best.keys(), ...position.keys()])]
@@ -429,6 +462,14 @@ export function createFeed() {
         const out = convert(topic, data)
         if (out.sessionType) state.sessionType = out.sessionType
         if (out.trackStatus) state.trackStatus = out.trackStatus
+        if (out.heartbeat) {
+            const beat = Date.parse(out.heartbeat)
+            if (Number.isFinite(beat)) state.skew = Date.now() - beat
+        }
+        if (out.sessionState && out.sessionState !== state.sessionState) {
+            state.sessionState = out.sessionState
+            state.sessionStateAt = Date.now()
+        }
         for (const d of out.drivers || []) {
             state.drivers[d.driver_number] = {
                 number: d.driver_number,
@@ -536,7 +577,7 @@ export function createFeed() {
             seenLive.length = 0; heardLive.length = 0; seenKeys.clear(); trail.clear()
             position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
             state.timing = []; state.raceControl = []; state.outline = []
-            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null
+            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0
         },
     }
 }

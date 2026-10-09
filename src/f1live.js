@@ -12,6 +12,13 @@ export function reset() {
     sessionPath = ''
 }
 
+export function utc(value) {
+    const text = String(value || '').trim()
+    if (!text) return null
+
+    return /(Z|[+-]\d\d:?\d\d)$/.test(text) ? text : `${text}Z`
+}
+
 export function toSeconds(value) {
     if (typeof value === 'number') return value
     const text = String(value || '').trim()
@@ -114,19 +121,19 @@ function stints(data) {
 
 function control(data) {
     return rows(data && data.Messages).map((m) => ({
-        date: m.Utc,
+        date: utc(m.Utc),
         message: m.Message || '',
         flag: m.Flag || '',
         driver_number: m.RacingNumber != null ? Number(m.RacingNumber) : null,
-    })).filter((m) => m.message)
+    })).filter((m) => m.message && m.date)
 }
 
 function radio(data) {
     return rows(data && data.Captures).map((c) => ({
-        date: c.Utc,
+        date: utc(c.Utc),
         driver_number: c.RacingNumber != null ? Number(c.RacingNumber) : null,
         recording_url: c.Path ? STATIC + sessionPath + c.Path : null,
-    })).filter((c) => c.recording_url)
+    })).filter((c) => c.recording_url && c.date)
 }
 
 function weather(data) {
@@ -142,7 +149,7 @@ function weather(data) {
 function places(data, stamp) {
     const out = []
     for (const frame of rows(data && data.Position)) {
-        const when = frame.Timestamp || stamp
+        const when = utc(frame.Timestamp) || stamp
         for (const [key, entry] of Object.entries(frame.Entries || {})) {
             const number = Number(key)
             if (!Number.isFinite(number) || !entry) continue
@@ -155,6 +162,7 @@ function places(data, stamp) {
 
 export function convert(topic, data, stamp = new Date().toISOString()) {
     switch (topic) {
+        case 'Heartbeat': return { heartbeat: utc(data && data.Utc) }
         case 'DriverList': return { drivers: drivers(data) }
         case 'TimingData': return timing(data, stamp)
         case 'TimingAppData': return { stints: stints(data) }
@@ -164,6 +172,8 @@ export function convert(topic, data, stamp = new Date().toISOString()) {
         case 'Position': return { loc: places(data, stamp) }
         case 'TrackStatus':
             return { trackStatus: FLAGS[Number(data && data.Status)] || 'green' }
+        case 'SessionStatus':
+            return { sessionState: (data && data.Status) || '' }
         case 'SessionInfo':
             sessionPath = (data && data.Path) || ''
             return {

@@ -59,8 +59,8 @@ function render() {
 async function loadCalendar() {
   weekends = await calendar.loadWeekends()
   render()
-  const cached = await calendar.cachedSessions()
-  if (cached) { sessions = cached; render() }
+  const saved = (await calendar.cachedSessions()) || (await calendar.bundledSessions())
+  if (saved) { sessions = saved; render() }
   const fresh = await calendar.refreshSessions()
   if (fresh) { sessions = fresh; weekends = calendar.weekendsNow(); render() }
 }
@@ -70,6 +70,12 @@ function paintFeed() {
   const using = feed.state.mode === 'live' && feed.liveReady()
   feedEl.hidden = !using
   if (!using) return
+
+  if (Math.abs(feed.state.skew) > 180_000) {
+    feedEl.dataset.feed = 'error'
+    feedEl.textContent = `Your clock is ${Math.round(feed.state.skew / 60_000)} min off`
+    return
+  }
 
   const info = feed.state.feed || { state: 'connecting', detail: '' }
   const silent = feed.state.feedAt ? Date.now() - feed.state.feedAt : Infinity
@@ -148,6 +154,15 @@ function stopDemo() {
   mapEl.classList.remove('map--live')
 }
 
+function liveClockText(pick, now) {
+  if (!pick.slack) return schedule.elapsed(pick.session, now)
+
+  const started = feed.state.sessionState === 'Started' && feed.state.sessionStateAt
+  if (started) return schedule.elapsed({ start: feed.state.sessionStateAt }, now)
+
+  return '--:--:--'
+}
+
 function renderCountdown() {
   const now = Date.now()
 
@@ -163,7 +178,7 @@ function renderCountdown() {
 
   if (pick.kind === 'live') {
     enterLive(pick.session)
-    liveClock.textContent = schedule.elapsed(pick.session, now)
+    liveClock.textContent = liveClockText(pick, now)
     paintLive()
   } else {
     leaveLive()
@@ -190,13 +205,19 @@ function renderCountdown() {
   }
 
   const live = pick.kind === 'live'
-  nextLabel.textContent = live
-    ? `${pick.session.short} is live ┃ ${pick.session.country}`
-    : `Next up: ${pick.session.short} ┃ ${pick.session.country}`
+  const running = live && (!pick.slack || feed.state.sessionState === 'Started')
+
+  nextLabel.textContent = !live
+    ? `Next up: ${pick.session.short} ┃ ${pick.session.country}`
+    : running
+      ? `${pick.session.short} is live ┃ ${pick.session.country}`
+      : `${pick.session.short} ┃ waiting for the session`
+
   nextTime.textContent = live
-    ? schedule.elapsed(pick.session, now)
+    ? liveClockText(pick, now)
     : schedule.formatCountdown(pick.at, now)
-  nextTime.classList.toggle('hero__time--live', live)
+
+  nextTime.classList.toggle('hero__time--live', running)
   nextWhen.textContent = schedule.localTime(pick.at)
 }
 

@@ -528,6 +528,16 @@ body {
   background: #FF9F1C;
 }
 
+.live__status[data-status="delayed"] {
+  background: #4DA6FF;
+  color: #0B0D10;
+}
+
+.live__status[data-status="waiting"] {
+  background: var(--muted);
+  color: #0B0D10;
+}
+
 .live__feed {
   margin: 0;
   padding: 0.35rem 0.9rem;

@@ -3,11 +3,14 @@ import { normalise } from './schedule.js'
 
 const API = 'https://api.openf1.org/v1'
 const PAD = 12 * 60 * 60 * 1000
+const BUNDLED = './sessions.json'
 const CACHE_KEY = 'sessions'
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000
 const CAL_KEY = 'calendar'
 const CAL_TTL = 60 * 24 * 60 * 60 * 1000
 const LIVE_PAD = 2 * 60 * 60 * 1000
+const LEAD = 5 * 60 * 1000
+const LAG = 90 * 60 * 1000
 
 let weekends = null
 let liveUntil = 0
@@ -97,6 +100,26 @@ export async function cachedSessions(now = Date.now()) {
     return entry.rows
 }
 
+export async function bundledSessions(now = Date.now()) {
+    try {
+        const response = await fetch(BUNDLED, { signal: AbortSignal.timeout(10_000) })
+        if (!response.ok) throw new Error(`sessions.json returned ${response.status}`)
+
+        const file = await response.json()
+        if (!file || file.year !== new Date(now).getUTCFullYear()) return null
+        if (!Array.isArray(file.rows) || !file.rows.length) return null
+
+        const rows = file.rows[0].date_start ? file.rows.map(normalise) : file.rows
+
+        return rows
+            .filter((s) => Number.isFinite(s.start) && Number.isFinite(s.end))
+            .sort((a, b) => a.start - b.start)
+    } catch (error) {
+        console.warn('calendar: bundled sessions unavailable', error)
+        return null
+    }
+}
+
 export async function refreshSessions(now = Date.now()) {
     const year = new Date(now).getUTCFullYear()
     try {
@@ -135,8 +158,19 @@ export async function refreshSessions(now = Date.now()) {
 
 export function targetFrom(sessions, list, now = Date.now()) {
     const rows = sessions || []
-    const live = rows.find((s) => now >= s.start && now <= s.end)
-    if (live) return { kind: 'live', session: live, at: live.start }
+
+    const exact = rows.find((s) => now >= s.start && now <= s.end)
+    if (exact) return { kind: 'live', session: exact, at: exact.start, slack: false }
+
+    let loose = null
+    for (let i = 0; i < rows.length; i++) {
+        const s = rows[i]
+        const after = rows[i + 1]
+        const until = Math.min(s.end + LAG, after ? after.start - LEAD : Infinity)
+        if (now >= s.start - LEAD && now <= until) loose = s
+    }
+    if (loose) return { kind: 'live', session: loose, at: loose.start, slack: true }
+
     const next = rows.find((s) => s.start > now)
     if (next) return { kind: 'session', session: next, at: next.start }
     const here = weekendAt(list, now)
