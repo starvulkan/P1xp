@@ -169,6 +169,13 @@ body {
   text-transform: uppercase;
 }
 
+.hero__join {
+  margin: 1.1rem 0 0;
+  align-self: flex-start;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.78rem;
+}
+
 /* program yourself in f1 with schedules! idk what to comment for these separators bro im so tired */
 
 .sched {
@@ -498,6 +505,24 @@ body {
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.live__pit {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.live__laps {
+  margin: 0;
+  color: var(--team);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .live__weather {
@@ -850,6 +875,33 @@ body {
   stroke-width: 14;
   stroke-linejoin: round;
   stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(216, 220, 226, 0.35));
+}
+
+.map__turn {
+  fill: var(--muted);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.map__zone {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map__zone[data-flag="yellow"] {
+  stroke: #FFC400;
+}
+
+.map__zone[data-flag="double"] {
+  stroke: #FF8A00;
+}
+
+.map__zone[data-flag="red"] {
+  stroke: #E8002D;
 }
 
 .map__car { 

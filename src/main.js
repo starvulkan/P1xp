@@ -9,7 +9,7 @@ import * as tracks from './tracks.js'
 import * as trackmap from './trackmap.js'
 import * as tower from './tower.js'
 import * as radio from './radio.js'
-import { createFeed, fmtWeather, OVER, DONE, ONE_SHOT, DEMO_SESSION, DEMO_SPEED } from './f1.js'
+import { createFeed, fmtWeather, fmtLaps, OVER, DONE, ONE_SHOT, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 import * as calendar from './calendar.js'
 import * as roster from './roster.js'
 
@@ -26,10 +26,14 @@ const liveEl = document.querySelector('#live')
 const feedEl = document.querySelector('#live-feed')
 const liveSession = document.querySelector('#live-session')
 const liveClock = document.querySelector('#live-clock')
+const liveLaps = document.querySelector('#live-laps')
+const livePit = document.querySelector('#live-pit')
 const liveWeather = document.querySelector('#live-weather')
 const mapEl = document.querySelector('#map')
 const replayBar = document.querySelector('#replay-bar')
 const replayText = document.querySelector('#replay-text')
+const joinEl = document.querySelector('#live-join')
+const exitEl = document.querySelector('#live-exit')
 
 const feed = createFeed()
 const renderTower = tower.mount({
@@ -50,6 +54,7 @@ const finished = new Set()
 const GRACE = 12 * 60 * 1000
 let pendingEnd = 0
 let holding = null
+let joinable = null
 
 const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
@@ -73,7 +78,16 @@ async function loadLayout(session) {
      if (!response.ok) throw new Error(`outline returned ${response.status}`)
 
     const file = await response.json()
-    if (Array.isArray(file.points) && file.points.length >= 50) layout = { key: slug, points: file.points }
+    if (Array.isArray(file.points) && file.points.length >= 50) {
+      layout = {
+        key: slug,
+        points: file.points,
+        rotation: Number(file.rotation) || 0,
+        corners: Array.isArray(file.corners) ? file.corners : [],
+        sectors: Array.isArray(file.sectors) ? file.sectors : [],
+        pitLoss: (file.pitLoss && Number(file.pitLoss.normal)) || 0,
+      }
+    }
   } catch (error) {
     console.warn('map: no bundled outline for', slug, error)
   }
@@ -86,6 +100,11 @@ async function loadCalendar() {
   if (saved) { sessions = saved; render() }
   const fresh = await calendar.refreshSessions()
   if (fresh) { sessions = fresh; weekends = calendar.weekendsNow(); render() }
+}
+
+function pitText() {
+  const loss = layout && Number(layout.pitLoss)
+  return Number.isFinite(loss) && loss >= 5 && loss <= 90 ? `Pit ~${loss.toFixed(1)}s` : ''
 }
 
 function paintFeed() {
@@ -144,7 +163,10 @@ async function enterLive(session) {
   await loadLayout(session)
   homeEl.hidden = true
   liveEl.hidden = false
+  joinEl.hidden = true
+  exitEl.hidden = false
   liveSession.textContent = `${session.short} \u2502 ${session.circuit}`
+  livePit.textContent = pitText()
   if (feed.liveReady()) await feed.startLiveFeed(session.type)
   else await feed.start(session.key, session.type)
 }
@@ -155,7 +177,20 @@ function leaveLive() {
   feed.stop()
   liveEl.hidden = true
   homeEl.hidden = false
+  exitEl.hidden = true
+  liveLaps.textContent = ''
+  livePit.textContent = ''
   mapEl.classList.remove('map--live')
+}
+
+async function joinLive() {
+  if (!joinable) return
+  await enterLive(joinable.session)
+}
+
+function exitLive() {
+  leaveLive()
+  renderCountdown()
 }
 
 async function startDemo() {
@@ -213,6 +248,10 @@ function renderCountdown() {
   const now = Date.now()
 
   if (demo) {
+    joinEl.hidden = true
+    exitEl.hidden = true
+    liveLaps.textContent = ''
+    livePit.textContent = ''
     liveClock.textContent = feed.state.clock
       ? new Date(feed.state.clock).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       : '--:--:--'
@@ -221,19 +260,33 @@ function renderCountdown() {
   }
 
   let pick = calendar.targetFrom(sessions, weekends, now)
-  
+
   const heard = feed.state.sessionState
   if (pick.kind !== 'live' && holding && heard && heard !== 'Inactive' && !finished.has(holding.session.key)) {
     pick = holding
   }
 
+  joinable = null
   if (pick.kind === 'live') {
     if (sessionOver(pick)) {
       holding = null
       pick = calendar.targetFrom(sessions.filter((s) => !finished.has(s.key)), weekends, now)
     } else {
       holding = pick
+      joinable = pick
     }
+  }
+
+  if (liveKey !== null && (!joinable || joinable.session.key !== liveKey)) leaveLive()
+
+  joinEl.hidden = !joinable || liveKey !== null
+  if (joinable) joinEl.textContent = `Join ${joinable.session.short} live`
+  exitEl.hidden = liveKey === null
+
+  if (liveKey !== null) {
+    liveClock.textContent = liveClockText(joinable, now)
+    liveLaps.textContent = fmtLaps(feed.state)
+    paintLive()
   }
 
   if (pick.kind === 'none') {
@@ -321,10 +374,13 @@ async function start() {
   document.querySelector('#setup-open').addEventListener('click', openSetup)
   document.querySelector('#demo-open').addEventListener('click', startDemo)
   document.querySelector('#replay-exit').addEventListener('click', stopDemo)
+  joinEl.addEventListener('click', joinLive)
+  exitEl.addEventListener('click', exitLive)
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || !wizardEl.hidden) return
     if (demo) stopDemo()
+    else if (liveKey !== null) exitLive()
   })
 
   for (const [id, url] of [

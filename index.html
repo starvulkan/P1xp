@@ -11,6 +11,7 @@
       <img class="bar__logo" src="./lockup-white.png" alt="P1xp" />
       <div class="bar__actions">
         <button class="btn" id="demo-open" type="button">Demo</button>
+        <button class="btn btn--team" id="live-exit" type="button" hidden>Exit live</button>
         <button class="btn btn--ghost" id="setup-open" type="button">Setup!</button>
       </div>
     </header>
@@ -25,6 +26,7 @@
         <p class="tag" id="next-label">Loading the calendar</p>
         <p class="hero__time" id="next-time">--:--:--</p>
         <p class="hero__when" id="next-when"></p>
+        <button class="btn btn--team hero__join" id="live-join" type="button" hidden>Join live</button>
       </section>
 
       <aside class="sched">
@@ -42,6 +44,8 @@
       <header class="live__head">
         <p class="tag" id="live-session">Session</p>
         <p class="live__clock" id="live-clock">00:00:00</p>
+        <p class="live__laps" id="live-laps"></p>
+        <p class="live__pit" id="live-pit"></p>
         <p class="live__weather" id="live-weather"></p>
         <p class="live__status" id="live-status" data-status="green">Track clear</p>
         <p class="live__feed" id="live-feed" data-feed="wait" hidden>Connecting</p> 

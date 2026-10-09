@@ -1,8 +1,9 @@
 import { paint } from './teams.js'
 
 const NS = 'http://www.w3.org/2000/svg'
-const PAD = 26
+const PAD = 44
 const BOX = 1000
+const LABEL = 24
 
 function bounds(points) {
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
@@ -16,7 +17,14 @@ function bounds(points) {
     return { minX, maxX, minY, maxY }
 }
 
-/* car dot drives off circuit prevention */
+function spin(deg) {
+    if (!deg) return (p) => p
+    const t = (deg * Math.PI) / 180
+    const c = Math.cos(t)
+    const s = Math.sin(t)
+    return ([x, y]) => [x * c - y * s, x * s + y * c]
+}
+
 function projector(box) {
     const w = box.maxX - box.minX
     const h = box.maxY - box.minY
@@ -25,8 +33,7 @@ function projector(box) {
     const offY = (BOX - h * scale) / 2
     return ([x, y]) => [
         (x - box.minX) * scale + offX,
-        /* flip it cuz openf1's y grows the opposite way to svgs */
-        BOX - ((y - box.minY) * scale + offY),    
+        BOX - ((y - box.minY) * scale + offY),
     ]
 }
 
@@ -42,10 +49,44 @@ function simplify(points, minGap = 12) {
     return out
 }
 
-export function buildPath(points, project) {
+export function buildPath(points, project, close = true) {
     const pts = points.map(project)
     if (pts.length < 2) return ''
-    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ') + ' Z'
+    const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
+    return close ? `${d} Z` : d
+}
+
+function nearest(points, at) {
+    let best = 0
+    let near = Infinity
+    for (let i = 0; i < points.length; i++) {
+        const d = (points[i][0] - at[0]) ** 2 + (points[i][1] - at[1]) ** 2
+        if (d < near) { near = d; best = i }
+    }
+    return best
+}
+
+function sectorSpans(points, sectors) {
+    const marks = []
+    for (const sector of sectors) {
+        if (!Array.isArray(sector.at) || !Number.isFinite(sector.at[0])) continue
+        marks.push({ number: sector.number, at: nearest(points, sector.at) })
+    }
+    if (marks.length < 2) return []
+    marks.sort((a, b) => a.at - b.at)
+    return marks.map((m, i) => ({ number: m.number, from: m.at, to: marks[(i + 1) % marks.length].at }))
+}
+
+function arc(points, from, to) {
+    if (to > from) return points.slice(from, to + 1)
+    return [...points.slice(from), ...points.slice(0, to + 1)]
+}
+
+function outward([x, y]) {
+    const dx = x - BOX / 2
+    const dy = y - BOX / 2
+    const len = Math.hypot(dx, dy) || 1
+    return [x + (dx / len) * LABEL, y + (dy / len) * LABEL]
 }
 
 export function mount(rootEl) {
@@ -55,13 +96,17 @@ export function mount(rootEl) {
     svg.setAttribute('aria-hidden', 'true')
 
     const track = document.createElementNS(NS, 'path')
+    const zones = document.createElementNS(NS, 'g')
     track.setAttribute('class', 'map__track')
+    const turns = document.createElementNS(NS, 'g')
     const cars = document.createElementNS(NS, 'g')
-    svg.append(track, cars)
+    svg.append(track, zones, turns, cars)
 
     const marks = new Map()
     let project = null
     let drawnKey = null
+    let spans = []
+    let shown = ''
 
     function markFor(number) {
         if (marks.has(number)) return marks.get(number)
@@ -80,12 +125,52 @@ export function mount(rootEl) {
         return marks.get(number)
     }
 
-    function draw(points, key) {
-        const box = bounds(points)
+    function drawFlags(points, flags) {
+        const stamp = spans.map((s) => `${s.number}${flags[s.number] || ''}`).join('|')
+        if (stamp === shown) return
+        shown = stamp
+
+        zones.textContent = ''
+        for (const span of spans) {
+            const flag = flags[span.number]
+            if (!flag) continue
+            const line = document.createElementNS(NS, 'path')
+            line.setAttribute('class', 'map__zone')
+            line.setAttribute('data-flag', flag)
+            line.setAttribute('d', buildPath(arc(points, span.from, span.to), project, false))
+            zones.append(line)
+        }
+    }
+
+    function drawTurns(corners) {
+        turns.textContent = ''
+        for (const corner of corners) {
+            if (!Number.isFinite(corner.x) || !Number.isFinite(corner.y)) continue
+            const [x, y] = outward(project([corner.x, corner.y]))
+            const label = document.createElementNS(NS, 'text')
+            label.setAttribute('class', 'map__turn')
+            label.setAttribute('x', x.toFixed(1))
+            label.setAttribute('y', y.toFixed(1))
+            label.setAttribute('text-anchor', 'middle')
+            label.setAttribute('dy', '6')
+            label.textContent = `${corner.number || ''}${corner.letter || ''}`
+            turns.append(label)
+        }
+    }
+
+    function draw(points, corners, sectors, rotation, key) {
+        const turn = spin(rotation)
+        const box = bounds(points.map(turn))
         if (!box) return false
 
-        project = projector(box)
+        const place = projector(box)
+        project = (point) => place(turn(point))
+        spans = sectorSpans(points, sectors)
+        shown = ''
+        zones.textContent = ''
+
         track.setAttribute('d', buildPath(simplify(points), project))
+        drawTurns(corners)
         rootEl.textContent = ''
         rootEl.append(svg)
         drawnKey = key
@@ -100,8 +185,14 @@ export function mount(rootEl) {
         const points = live ? state.outline : (bundled ? layout.points : null)
         if (!points) { drawnKey = null; return false }
 
-        const key = `${(layout && layout.key) || 'none'}:${live ? 'live' : 'bundled'}`
-        if (drawnKey !== key && !draw(points, key)) return false
+        const rotation = (layout && Number(layout.rotation)) || 0
+        const corners = (layout && Array.isArray(layout.corners)) ? layout.corners : []
+        const sectors = (layout && Array.isArray(layout.sectors)) ? layout.sectors : []
+
+        const key = `${(layout && layout.key) || 'none'}:${live ? 'live' : 'bundled'}:${rotation}:${corners.length}:${sectors.length}`
+        if (drawnKey !== key && !draw(points, corners, sectors, rotation, key)) return false
+
+        drawFlags(points, state.sectorFlags || {})
 
         const seen = new Set()
         for (const [number, car] of Object.entries(state.locations || {})) {
@@ -123,4 +214,4 @@ export function mount(rootEl) {
 
         return true
     }
-}    
+}

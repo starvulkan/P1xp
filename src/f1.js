@@ -99,6 +99,22 @@ function statusFrom(messages) {
     return 'green'
 }
 
+const SECTOR = /(DOUBLE YELLOW|YELLOW|CLEAR|GREEN|RED)(?: FLAGS?)?\s+IN TRACK SECTOR\s+(\d+)/
+
+export function sectorsFrom(messages) {
+    const out = {}
+    for (const m of messages) {
+        const hit = SECTOR.exec(String(m.message || '').toUpperCase())
+        if (!hit) continue
+        const number = Number(hit[2])
+        if (!Number.isFinite(number)) continue
+        if (hit[1] === 'CLEAR' || hit[1] === 'GREEN') delete out[number]
+        else if (hit[1] === 'RED') out[number] = 'red'
+        else out[number] = hit[1] === 'DOUBLE YELLOW' ? 'double' : 'yellow'
+    }
+    return out
+}
+
 function penaltiesFrom(messages) {
     const secs = {}
     const other = {}
@@ -141,6 +157,11 @@ export function delayNotice(state, now = Date.now()) {
     return hit ? hit.message : ''
 }
 
+export function fmtLaps(state) {
+    if (!RACES.has(state.sessionType) || !state.lapCurrent) return ''
+    return state.lapTotal ? `Lap ${state.lapCurrent} / ${state.lapTotal}` : `Lap ${state.lapCurrent}`
+}
+
 export function statusOf(state, now = Date.now()) {
     if (state.trackStatus === 'red') return 'red'
     if (state.sessionState === 'Aborted') return 'delayed'
@@ -162,6 +183,7 @@ export function createFeed() {
         trackStatus: 'green',
         raceControl: [],
         penalties: {},
+        sectorFlags: {},
         radio: [],
         weather: null,
         mode: 'live',
@@ -169,6 +191,8 @@ export function createFeed() {
         sessionState: '',
         sessionPart: 0,
         sessionStateAt: 0,
+        lapCurrent: 0,
+        lapTotal: 0,
         skew: 0,
         feed: null,
         feedAt: 0,
@@ -246,6 +270,15 @@ export function createFeed() {
             })
         }
 
+        if (!timed) {
+            let seen = 0
+            for (const l of lap.values()) if (Number.isFinite(l.lap_number) && l.lap_number > seen) seen = l.lap_number
+            if (seen) {
+                const next = state.lapTotal ? Math.min(seen + 1, state.lapTotal) : seen + 1
+                if (next > state.lapCurrent) state.lapCurrent = next
+            }
+        }
+
         if (timed) {
             rows.sort((a, b2) => {
                 if (a.bestLap == null && b2.bestLap == null) return a.number - b2.number
@@ -301,6 +334,7 @@ export function createFeed() {
             .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 40)
         state.trackStatus = statusFrom(rc)
         state.penalties = penaltiesFrom(rc)
+        state.sectorFlags = sectorsFrom(rc)
     }
     if (radio) state.radio = radio.filter((r) => r.recording_url)
         .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 25)
@@ -328,6 +362,7 @@ export function createFeed() {
                 .slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 40)
             state.trackStatus = statusFrom(streams.rc.seen)
             state.penalties = penaltiesFrom(streams.rc.seen)
+            state.sectorFlags = sectorsFrom(streams.rc.seen)
             state.radio = streams.radio.heard.slice(0, 25)
             rebuild()
         }
@@ -476,6 +511,10 @@ export function createFeed() {
             state.sessionStateAt = Date.now()
         }
         if (Number.isFinite(out.part)) state.sessionPart = out.part
+        if (out.lapCount) {
+            if (Number.isFinite(out.lapCount.current)) state.lapCurrent = out.lapCount.current
+            if (Number.isFinite(out.lapCount.total)) state.lapTotal = out.lapCount.total
+        }
         for (const d of out.drivers || []) {
             state.drivers[d.driver_number] = {
                 number: d.driver_number,
@@ -512,6 +551,7 @@ export function createFeed() {
             state.raceControl = seenLive.slice()
                 .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 40)
             state.penalties = penaltiesFrom(seenLive)
+            state.sectorFlags = sectorsFrom(seenLive)
         }
         for (const r of out.radio || []) {
             const key = `r|${r.recording_url}`
@@ -583,7 +623,7 @@ export function createFeed() {
             seenLive.length = 0; heardLive.length = 0; seenKeys.clear(); trail.clear()
             position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
             state.timing = []; state.raceControl = []; state.outline = []
-            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0; state.sessionPart = 0
+            state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0; state.sessionPart = 0; state.lapCurrent = 0; state.lapTotal = 0; state.sectorFlags = {};
         },
     }
 }

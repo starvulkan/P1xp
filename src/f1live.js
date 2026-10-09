@@ -107,6 +107,16 @@ function timing(data, stamp) {
     return { pos, iv, laps, best, part: data && data.SessionPart != null ? Number(data.SessionPart) : null }
 }
 
+function lapCount(data) {
+    if (!data) return null
+    const current = Number(data.CurrentLap)
+    const total = Number(data.TotalLaps)
+    return {
+        current: Number.isFinite(current) ? current : null,
+        total: Number.isFinite(total) ? total : null,
+    }
+}
+
 function stints(data) {
     const out = []
     for (const [key, line] of Object.entries((data && data.Lines) || {})) {
@@ -173,6 +183,7 @@ export function convert(topic, data, stamp = new Date().toISOString()) {
         case 'DriverList': return { drivers: drivers(data) }
         case 'TimingData': return timing(data, stamp)
         case 'TimingAppData': return { stints: stints(data) }
+        case 'LapCount': return { lapCount: lapCount(data) }
         case 'RaceControlMessages': return { rc: control(data) }
         case 'TeamRadio': return { radio: radio(data) }
         case 'WeatherData': return { weather: weather(data) }
