@@ -406,7 +406,7 @@ body {
       rgb(16 19 24 / 0.10) 100%);
 }
 
-.hero > p, .hero__fill {
+.hero > p, .hero__fill, .hero__join {
   position: relative;
   z-index: 1;
 }
