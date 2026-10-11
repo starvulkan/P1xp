@@ -26,11 +26,11 @@
 
 <h1>About!</h1>
 
-P1xp provides you an unique way to experience Formula 1, right from your PC! P1xp provides race weekend schedules, countdown to each session, customization based on your favs, and a cool live session data displayer! 
+P1xp provides you a unique way to experience Formula 1, right from your PC! P1xp provides race weekend schedules, countdown to each session, customization based on your favs, and a cool live session data displayer! 
 
 ## Why P1xp?
 
-Apart from combining my favorite hobbies (programming and motorsport), I've always wanted to create a data displayer for F1 that's easy to use and to set up, and best of all, free to use. I've always found myself wanting more data during F1 sessions, to get a better understanding of what's going on. I hope you are able to find use and enjoyment in my silly litle project, and can bring you a bit more fun in these troubled F1 times.
+Apart from combining my favorite hobbies (programming and motorsport), I've always wanted to create a data displayer for F1 that's easy to use and to set up, and best of all, free to use. I've always found myself wanting more data during F1 sessions, to get a better understanding of what's going on. I hope you are able to find use and enjoyment in my silly little project, and can bring you a bit more fun in these troubled F1 times.
 
 ## Main features!
 
@@ -87,8 +87,8 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 ---
 
-<h3>Layouts!<h3>
-<sub>*NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used can here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.*</sub>
+<h3>Layouts!</h3>
+<sub>*NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.*</sub>
 
 ---
 
@@ -130,8 +130,8 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 **P1xp relies on three APIs to work:**
 
 1. OpenF1 (Schedules, calendars, drivers, demo data; all available through a local offline fallback).
-2. F1's offcial servers (through a SignalR Core client to extract live data).
-3. MultiViewer (circuit map and its elements and car status in tower).
+2. F1's official servers (through a SignalR Core client to extract live data).
+3. MultiViewer (circuit outlines, corner numbers, marshal sector positions, pit loss times).
 
 ---
 
@@ -148,6 +148,14 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 | <img src="docs/screenshots/raceLive_waiting.png"> | <img src="docs/screenshots/raceLive_yellow.png"> |
 | <img src="docs/screenshots/setup_driver.png"> | <img src="docs/screenshots/setup_f1TV.png"> |
 | <img src="docs/screenshots/setup_team.png"> | <img src="docs/screenshots/about.png"> |
+
+---
+
+<h1>Made for Stardance!</h1>
+
+---
+
+this project was created as part of the Hack Club Stardance challenge!
 
 
 
