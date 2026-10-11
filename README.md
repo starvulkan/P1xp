@@ -147,9 +147,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 | <img src="docs/screenshots/raceLive_normal.png"> | <img src="docs/screenshots/raceLive_vscYellow_Double.png"> |
 | <img src="docs/screenshots/raceLive_waiting.png"> | <img src="docs/screenshots/raceLive_yellow.png"> |
 | <img src="docs/screenshots/setup_driver.png"> | <img src="docs/screenshots/setup_f1TV.png"> |
-|  |
-|:--:|
-| <img src="docs/screenshots/setup_team.png"> |
+| <img src="docs/screenshots/setup_team.png"> | <img src="docs/screenshots/about.png"> |
 
 
 
