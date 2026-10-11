@@ -12,6 +12,7 @@ import * as radio from './radio.js'
 import { createFeed, fmtWeather, fmtLaps, OVER, DONE, ONE_SHOT, DEMO_SESSION, DEMO_SPEED } from './f1.js'
 import * as calendar from './calendar.js'
 import * as roster from './roster.js'
+import { get as read, set as write } from './storage.js'
 
 const nextLabel = document.querySelector('#next-label')
 const meetingName = document.querySelector('#meeting-name')
@@ -55,6 +56,7 @@ let favourite = null
 let demo = false
 let layout = null
 const finished = new Set()
+const SEEN = 'finished'
 const GRACE = 12 * 60 * 1000
 const HOLD = 5 * 60 * 1000
 let pendingEnd = 0
@@ -246,6 +248,17 @@ function stopDemo() {
   mapEl.classList.remove('map--live')
 }
 
+function markFinished(key) {
+  finished.add(key)
+  write(SEEN, [...finished].slice(-120))
+}
+
+async function loadFinished() {
+  const saved = await read(SEEN, [])
+  if (!Array.isArray(saved)) return
+  for (const key of saved) finished.add(key)
+}
+
 function sessionOver(pick) {
   if (finished.has(pick.session.key)) return true
 
@@ -253,16 +266,16 @@ function sessionOver(pick) {
   const part = feed.state.sessionPart
   const segmented = part > 0 || !ONE_SHOT.has(feed.state.sessionType)
 
-  if (DONE.has(state)) { finished.add(pick.session.key); return true }
+  if (DONE.has(state)) { markFinished(pick.session.key); return true }
   if (state !== 'Finished') { pendingEnd = 0; return false }
 
-  if (!segmented || part >= 3) { finished.add(pick.session.key); return true }
+  if (!segmented || part >= 3) { markFinished(pick.session.key); return true }
   if (part > 0) { pendingEnd = 0; return false }
 
   if (!pendingEnd) pendingEnd = Date.now()
   if (Date.now() - pendingEnd < GRACE) return false
 
-  finished.add(pick.session.key)
+  markFinished(pick.session.key)
   return true
 }
 
@@ -445,7 +458,8 @@ async function start() {
   }
 
   if (!(await setup.isDone())) openSetup()
-
+  
+  await loadFinished()
   await loadCalendar()
   setInterval(renderCountdown, 1000)
   setInterval(renderWeekend, 60_000)
