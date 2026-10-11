@@ -10,6 +10,12 @@
     <a href="https://github.com/starvulkan/P1xp/releases/latest"><b>Download →</b></a>
 </p>
 
+---
+
+![Home](docs/screenshots/home_normal.png)
+
+<sub>*Home menu*</sub>
+
 ## About!
 
 P1xp provides you an unique way to experience Formula 1, right from your PC!
