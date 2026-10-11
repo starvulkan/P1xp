@@ -72,18 +72,87 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 ---
 
-![Home menu live, labeled](docs/labeled/liveMode.png)
+![Live mode, labeled](docs/labeled/liveMode.png)
 
 **Live mode:**
 
 1. Main session info (Event, stopwatch, lap count & pit loss (limited to race & sprint), track & air temperature).
 2. Options menu (same options as before, plus the exit live button).
 3. Session state info (Track clear, yellow flag, VSC, SC, red flag, waiting to start, finished, etc).
-4. Race feed allocated space for F1 TV stream (depends on your choice in the setup wizard, more info in [Layouts]!).*
+4. Race feed allocated space for F1 TV stream (depends on your choice in the setup wizard, more info in Layouts!).*
 5. Race control announcements.
 6. Team radios.
 7. Track circuit map (with turn numbers and marshal sector lights).
 8. Position tower (driver, wheel compound type, lap times, gap to leader (for qualis/practice), gap to next car (for race/sprint), plus car status (in pit/out, retired, eliminated)).
+
+---
+
+<h3>Layouts!<h3>
+<sub>*NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used can here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.*</sub>
+
+---
+
+![Layout (No F1 TV)](docs/labeled/demoLayout_no.png)
+
+<sub>*No F1 TV*</sub>
+
+---
+
+![Layout (F1 TV Pro)](docs/labeled/demoLayout_pro.png)
+
+<sub>*F1 TV Pro*</sub>
+
+---
+
+![Layout (F1 TV Premium)](docs/labeled/demoLayout_prem.png)
+
+<sub>*F1 TV Premium*</sub>
+
+---
+
+**Layouts:**
+
+*The amount of allocated spaces for F1 TV live streams you get in your live mode is determined by your choice in the setup wizard. (No F1 TV -> 0, F1 TV Pro -> 1 (race feed), F1 TV Premium -> 2 (race feed + fav driver onboard))*
+
+1. Circuit map.
+2. Race control.
+3. Team radio.
+4. Position tower.
+5. Race feed.
+6. Fav driver onboard.
+
+---
+
+<h1>About API Usage!</h1>
+
+---
+
+**P1xp relies on three APIs to work:**
+
+1. OpenF1 (Schedules, calendars, drivers, demo data; all available through a local offline fallback).
+2. F1's offcial servers (through a SignalR Core client to extract live data).
+3. MultiViewer (circuit map and its elements and car status in tower).
+
+---
+
+<h1>Image Gallery!</h1>
+
+|  |  |
+|:--:|:--:|
+| <img src="docs/screenshots/demo_no.png"> | <img src="docs/screenshots/demo_prem.png"> |
+| <img src="docs/screenshots/demo_pro.png"> | <img src="docs/screenshots/home_normal.png"> |
+| <img src="docs/screenshots/qualiHome_live.png"> | <img src="docs/screenshots/qualiLive_normal.png"> |
+| <img src="docs/screenshots/qualiLive_yellow.png"> | <img src="docs/screenshots/raceHome_live.png"> |
+| <img src="docs/screenshots/raceHome_waiting.png"> | <img src="docs/screenshots/raceLive_finished.png"> |
+| <img src="docs/screenshots/raceLive_normal.png"> | <img src="docs/screenshots/raceLive_vscYellow_Double.png"> |
+| <img src="docs/screenshots/raceLive_waiting.png"> | <img src="docs/screenshots/raceLive_yellow.png"> |
+| <img src="docs/screenshots/setup_driver.png"> | <img src="docs/screenshots/setup_f1TV.png"> |
+|  |
+|:--:|
+| <img src="docs/screenshots/setup_team.png"> |
+
+
+
 
 
 
