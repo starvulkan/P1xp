@@ -88,7 +88,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 ---
 
 <h3>Layouts!</h3>
-<sub>*NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.*</sub>
+<sub>NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.</sub>
 
 ---
 
@@ -152,8 +152,6 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 ---
 
 <h1>Made for Stardance!</h1>
-
----
 
 this project was created as part of the Hack Club Stardance challenge!
 
