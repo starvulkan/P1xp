@@ -247,7 +247,6 @@ function stopDemo() {
 }
 
 function sessionOver(pick) {
-  if (!pick.slack) { pendingEnd = 0; return false }
   if (finished.has(pick.session.key)) return true
 
   const state = feed.state.sessionState
@@ -368,7 +367,10 @@ function renderCountdown() {
 
 function renderWeekend() {
   const now = Date.now()
-  const pick = calendar.targetFrom(sessions, weekends, now)
+  let pick = calendar.targetFrom(sessions, weekends, now)
+  if (pick.kind === 'live' && finished.has(pick.session.key)) {
+    pick = calendar.targetFrom(sessions.filter((s) => !finished.has(s.key)), weekends, now)
+  }
   weekendList.textContent = ''
   if (pick.kind === 'none') return
 
