@@ -24,13 +24,13 @@
 
 ---
 
-## About!
+<h1>About!</h1>
 
 P1xp provides you an unique way to experience Formula 1, right from your PC! P1xp provides race weekend schedules, countdown to each session, customization based on your favs, and a cool live session data displayer! 
 
 ## Why P1xp?
 
-Apart from combining my favorite hobbies (programming and motorsport), I've always wanted to create a data displayer for F1 that's easy to use and to set up, and best of all, free to use. I've always found myself wanting more data during F1 sessions, to get a better view of what's going on. I hope you are able to find use and enjoyment in my silly litle project, and can bring you a bit more fun in these troubled F1 times.
+Apart from combining my favorite hobbies (programming and motorsport), I've always wanted to create a data displayer for F1 that's easy to use and to set up, and best of all, free to use. I've always found myself wanting more data during F1 sessions, to get a better understanding of what's going on. I hope you are able to find use and enjoyment in my silly litle project, and can bring you a bit more fun in these troubled F1 times.
 
 ## Main features!
 
@@ -43,9 +43,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 <h1>The app, debriefed!</h1>
 
----
-
-<h3>Home menu</h3>
+<h3>Home menu!</h3>
 
 ---
 
@@ -67,5 +65,25 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 1. Live session stopwatch.
 2. Join live session button. This allows you to enter the live data displayer for the current live session.
+
+---
+
+<h3>Data displayer (Live Mode)!</h3>
+
+---
+
+![Home menu live, labeled](docs/labeled/liveMode.png)
+
+**Live mode:**
+
+1. Main session info (Event, stopwatch, lap count & pit loss (limited to race & sprint), track & air temperature).
+2. Options menu (same options as before, plus the exit live button).
+3. Session state info (Track clear, yellow flag, VSC, SC, red flag, waiting to start, finished, etc).
+4*. Race feed allocated space for F1 TV stream (depends on your choice in the setup wizard, more info in [Layouts]!).
+5. Race control announcements.
+6. Team radios.
+7. Track circuit map (with turn numbers and marshal sector lights).
+8. Position tower (driver, wheel compound type, lap times, gap to leader (for qualis/practice), gap to next car (for race/sprint), plus car status (in pit/out, retired, eliminated)).
+
 
 
