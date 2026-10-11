@@ -79,7 +79,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 1. Main session info (Event, stopwatch, lap count & pit loss (limited to race & sprint), track & air temperature).
 2. Options menu (same options as before, plus the exit live button).
 3. Session state info (Track clear, yellow flag, VSC, SC, red flag, waiting to start, finished, etc).
-4*. Race feed allocated space for F1 TV stream (depends on your choice in the setup wizard, more info in [Layouts]!).
+4. Race feed allocated space for F1 TV stream (depends on your choice in the setup wizard, more info in [Layouts]!).*
 5. Race control announcements.
 6. Team radios.
 7. Track circuit map (with turn numbers and marshal sector lights).
