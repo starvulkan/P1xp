@@ -63,6 +63,15 @@ function newest(target, row, stamp) {
     if (!prev || new Date(row[stamp]) >= new Date(prev[stamp])) target.set(n, row)
 }
 
+function carStatus(flags) {
+    if (!flags) return ''
+    if (flags.retired || flags.stopped) return 'out'
+    if (flags.knockedOut) return 'knocked'
+    if (flags.inPit) return 'pit'
+    if (flags.pitOut) return 'outlap'
+    return ''
+}
+
 export function fmtLap(seconds) {
     if (!Number.isFinite(seconds) || seconds <= 0) return '--'
     const m = Math.floor(seconds / 60)
@@ -208,6 +217,7 @@ export function createFeed() {
     const stint = new Map()
     const location = new Map()
     const best = new Map()
+    const carFlags = new Map()
     const seenLive = []
     const heardLive = []
     const seenKeys = new Set()
@@ -267,6 +277,7 @@ export function createFeed() {
                     ? s.tyre_age_at_start + (l.lap_number - s.lap_start) + 1
                     : null,
                 penalty: state.penalties[number] || null,
+                status: carStatus(carFlags.get(number)),
             })
         }
 
@@ -528,6 +539,7 @@ export function createFeed() {
         for (const r of out.iv || []) newest(interval, r, 'date')
         for (const r of out.laps || []) newest(lap, r, 'date_start')
         for (const r of out.best || []) fastest(best, r)
+        for (const f of out.flags || []) carFlags.set(f.driver_number, f)
         for (const s of out.stints || []) stint.set(s.driver_number, s)
         for (const r of out.loc || []) {
             newest(location, r, 'date')
@@ -621,7 +633,7 @@ export function createFeed() {
             if (detach) { detach(); detach = null }
             if (typeof window !== 'undefined' && window.p1xp && window.p1xp.stopLive) window.p1xp.stopLive()
             seenLive.length = 0; heardLive.length = 0; seenKeys.clear(); trail.clear()
-            position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear()
+            position.clear(); interval.clear(); lap.clear(); stint.clear(); location.clear(); best.clear(); carFlags.clear()
             state.timing = []; state.raceControl = []; state.outline = []
             state.trackStatus = 'green'; state.penalties = {}; state.radio = []; state.weather = null; state.sessionState = ''; state.sessionStateAt = 0; state.skew = 0; state.sessionPart = 0; state.lapCurrent = 0; state.lapTotal = 0; state.sectorFlags = {};
         },

@@ -1,8 +1,10 @@
 import { paint } from './teams.js'
 import { fmtLap, fmtGap, statusOf, delayNotice } from './f1.js'
 
+const BADGE = { pit: 'PIT', outlap: 'OUT', out: 'RET', knocked: 'ELIM' }
 export function mount({ listEl, statusEl, feedEl }) {
     const rows = new Map()
+    const beats = new Map()
 
     function rowFor(number) {
         if (rows.has(number)) return rows.get(number)
@@ -18,6 +20,7 @@ export function mount({ listEl, statusEl, feedEl }) {
         cells.pos = add('tower__pos')
         cells.color = add('tower__color', 'i')
         cells.abbr = add('tower__abbr')
+        cells.state = add('tower__state')
         cells.pen = add('tower__pen')
         cells.tyre = add('tower__tyre')
         cells.lap = add('tower__lap')
@@ -43,12 +46,27 @@ export function mount({ listEl, statusEl, feedEl }) {
             cells.tyre.title = d.stintLaps ? `${d.stintLaps} laps on this set` : ''
             cells.lap.textContent = fmtLap(d.lastLap)
             cells.gap.textContent = index === 0 ? 'LEADER' : fmtGap(d.interval ?? d.gap)
+
+            cells.state.textContent = BADGE[d.status] || ''
+            el.dataset.status = d.status || ''
+
+            const beat = `${d.pos}|${d.lastLap}|${d.gap}|${d.interval}|${d.status}`
+            if (beats.get(d.number) !== beat) {
+                const seenBefore = beats.has(d.number)
+                beats.set(d.number, beat)
+                if (seenBefore) {
+                    el.classList.remove('tower__row--beat')
+                    void el.offsetWidth
+                    el.classList.add('tower__row--beat')
+                }
+            }
+
             if (el.parentNode !== listEl || listEl.children[index] !== el) {
                 listEl.insertBefore(el, listEl.children[index] || null)
             }
         })
         for (const [number, row] of rows) {
-            if (!seen.has(number)) { row.el.remove(); rows.delete(number) }
+            if (!seen.has(number)) { row.el.remove(); rows.delete(number); beats.delete(number) }
         }
     }
 

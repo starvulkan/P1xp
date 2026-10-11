@@ -71,6 +71,7 @@ function timing(data, stamp) {
     const iv = []
     const laps = []
     const best = []
+    const flags = []
     for(const [key, line] of Object.entries((data && data.Lines) || {})) {
         const number = Number(key)
         if (!Number.isFinite(number) || !line) continue
@@ -83,7 +84,24 @@ function timing(data, stamp) {
         if (line.LastLapTime && line.LastLapTime.Value) patch.last = toSeconds(line.LastLapTime.Value)
         if (line.BestLapTime && line.BestLapTime.Value) patch.best = toSeconds(line.BestLapTime.Value)
         if (line.NumberOfLaps != null) patch.lapNumber = Number(line.NumberOfLaps)
+        if (line.InPit != null) patch.inPit = !!line.InPit
+        if (line.PitOut != null) patch.pitOut = !!line.PitOut
+        if (line.Retired != null) patch.retired = !!line.Retired
+        if (line.Stopped != null) patch.stopped = !!line.Stopped
+        if (line.KnockedOut != null) patch.knockedOut = !!line.KnockedOut
         const state = merge(number, patch)
+
+        if (patch.inPit != null || patch.pitOut != null || patch.retired != null
+            || patch.stopped != null || patch.knockedOut != null) {
+                flags.push({
+                    driver_number: number,
+                    inPit: !!state.inPit,
+                    pitOut: !!state.pitOut,
+                    retired: !!state.retired,
+                    stopped: !!state.stopped,
+                    knockedOut: !!state.knockedOut,
+                })
+            }
 
         if (patch.position != null) pos.push({ driver_number: number, position: state.position, date: stamp })
         if (patch.gap != null || patch.interval != null) {
@@ -104,7 +122,7 @@ function timing(data, stamp) {
         }
         if (patch.best != null) best.push({ driver_number: number, lap_duration: state.best })
     }
-    return { pos, iv, laps, best, part: data && data.SessionPart != null ? Number(data.SessionPart) : null }
+    return { pos, iv, laps, best, flags, part: data && data.SessionPart != null ? Number(data.SessionPart) : null }
 }
 
 function lapCount(data) {

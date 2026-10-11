@@ -255,6 +255,54 @@ body {
   .sched__item { min-height: 3.2rem; }
 }
 
+/* take away your app's mid-life crisis with a about menu! */
+
+.about {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  display: grid;
+  place-items: center;
+  padding: var(--pad);
+  background: rgb(0 0 0 / 0.82);
+}
+
+.about__panel {
+  width: min(22rem, 100%);
+  padding: var(--pad);
+  background: var(--panel);
+  border-left: 5px solid var(--team);
+  text-align: center;
+}
+
+.about__logo {
+  display: block;
+  height: 44px;
+  width: auto;
+  margin: 0 auto var(--pad);
+}
+
+.about__build {
+  margin: 0 0 0.3rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.about__by {
+  margin: 0 0 0.3rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.about__by:last-of-type {
+  margin-bottom: var(--pad);
+}
+
 /* first time setup wizard, the one that sets your driver and team choices, as well as your current financial condition in f1 terms. */
 
 .wizard {
@@ -658,7 +706,7 @@ body {
 
 .tower__row {
   display: grid;
-  grid-template-columns: 1.9rem 4px 3.2rem auto 1.4rem 1fr auto;
+  grid-template-columns: 1.9rem 4px 3.2rem auto auto 1.4rem 1fr auto;
   align-items: center;
   gap: 0.55rem;
   padding: 0.38rem var(--pad);
@@ -686,6 +734,41 @@ body {
 .tower__abbr {
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.tower__state {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.tower__row[data-status="pit"] .tower__state {
+  color: #FFC400;
+}
+
+.tower__row[data-status="outlap"] .tower__state {
+  color: #6FD3A0;
+}
+
+.tower__row[data-status="out"],
+.tower__row[data-status="knocked"] {
+  opacity: 0.45;
+}
+
+@keyframes beat {
+  from { background: rgb(255 255 255 / 0.16); }
+  to { background: transparent; }
+}
+
+.tower__row--beat {
+  animation: beat 600ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower__row--beat {
+    animation: none;
+  }
 }
 
 .tower__pen {

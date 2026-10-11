@@ -20,7 +20,11 @@ const nextTime = document.querySelector('#next-time')
 const nextWhen = document.querySelector('#next-when')
 const weekendList = document.querySelector('#weekend-list')
 
+const VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'
+
 const wizardEl = document.querySelector('#wizard')
+const aboutEl = document.querySelector('#about')
+const aboutBuild = document.querySelector('#about-build')
 const homeEl = document.querySelector('#home')
 const liveEl = document.querySelector('#live')
 const feedEl = document.querySelector('#live-feed')
@@ -52,9 +56,14 @@ let demo = false
 let layout = null
 const finished = new Set()
 const GRACE = 12 * 60 * 1000
+const HOLD = 5 * 60 * 1000
 let pendingEnd = 0
 let holding = null
 let joinable = null
+let joined = null
+let watching = false
+let frozen = false
+let overAt = 0
 
 const applyTrack = tracks.mount({
   photoEl: document.querySelector('#hero-photo'),
@@ -156,28 +165,41 @@ function paintLive() {
   if (renderMap(feed.state, favourite, layout)) mapEl.classList.add('map--live')
 }
 
-async function enterLive(session) {
-  if (liveKey === session.key) return
-  liveKey = session.key
-  favourite = await setup.currentDriver()
-  await loadLayout(session)
+function showLive() {
+  watching = true
   homeEl.hidden = true
   liveEl.hidden = false
   joinEl.hidden = true
   exitEl.hidden = false
-  liveSession.textContent = `${session.short} \u2502 ${session.circuit}`
-  livePit.textContent = pitText()
-  if (feed.liveReady()) await feed.startLiveFeed(session.type)
-  else await feed.start(session.key, session.type)
 }
 
-function leaveLive() {
-  if (liveKey === null) return
-  liveKey = null
-  feed.stop()
+function hideLive() {
+  watching = false
   liveEl.hidden = true
   homeEl.hidden = false
   exitEl.hidden = true
+}
+
+async function startLive(pick) {
+  joined = pick
+  frozen = false
+  overAt = 0
+  liveKey = pick.session.key
+  favourite = await setup.currentDriver()
+  await loadLayout(pick.session)
+  liveSession.textContent = `${pick.session.short} \u2502 ${pick.session.circuit}`
+  livePit.textContent = pitText()
+  if (feed.liveReady()) await feed.startLiveFeed(pick.session.type)
+  else await feed.start(pick.session.key, pick.session.type)
+}
+
+function endLive() {
+  if (liveKey === null) return
+  liveKey = null
+  joined = null
+  frozen = false
+  overAt = 0
+  feed.stop()
   liveLaps.textContent = ''
   livePit.textContent = ''
   mapEl.classList.remove('map--live')
@@ -185,15 +207,25 @@ function leaveLive() {
 
 async function joinLive() {
   if (!joinable) return
-  await enterLive(joinable.session)
+  showLive()
+  if (liveKey === joinable.session.key) {
+    paintLive()
+    return
+  }
+  await startLive(joinable)
 }
 
 function exitLive() {
-  leaveLive()
+  if (!watching) return
+  hideLive()
   renderCountdown()
 }
 
 async function startDemo() {
+  if (liveKey !== null) {
+    hideLive()
+    endLive()
+  }
   demo = true
   favourite = await setup.currentDriver()
   await loadLayout({ circuit: 'Silverstone', country: 'United Kingdom' })
@@ -277,16 +309,24 @@ function renderCountdown() {
     }
   }
 
-  if (liveKey !== null && (!joinable || joinable.session.key !== liveKey)) leaveLive()
-
-  joinEl.hidden = !joinable || liveKey !== null
+  joinEl.hidden = !joinable || watching
   if (joinable) joinEl.textContent = `Join ${joinable.session.short} live`
-  exitEl.hidden = liveKey === null
+  exitEl.hidden = !watching
 
-  if (liveKey !== null) {
-    liveClock.textContent = liveClockText(joinable, now)
-    liveLaps.textContent = fmtLaps(feed.state)
-    paintLive()
+  if (liveKey !== null && joined) {
+    const over = !joinable || joinable.session.key !== liveKey
+    overAt = over ? (overAt || now) : 0
+
+    const settled = over && now - overAt >= HOLD
+
+    if (watching && !frozen) {
+      if (!over) liveClock.textContent = liveClockText(joined, now)
+      liveLaps.textContent = fmtLaps(feed.state)
+      paintLive()
+      frozen = settled
+    }
+
+    if (settled && !watching) endLive()
   }
 
   if (pick.kind === 'none') {
@@ -371,6 +411,11 @@ async function start() {
     doneEl: document.querySelector('#setup-done'),
     fetchDrivers: roster.load,
   })
+
+  aboutBuild.textContent = `P1xp build ${VERSION}`
+  document.querySelector('#about-open').addEventListener('click', () => { aboutEl.hidden = false })
+  document.querySelector('#about-close').addEventListener('click', () => { aboutEl.hidden = true })
+  aboutEl.addEventListener('click', (event) => { if (event.target === aboutEl) aboutEl.hidden = true })
   document.querySelector('#setup-open').addEventListener('click', openSetup)
   document.querySelector('#demo-open').addEventListener('click', startDemo)
   document.querySelector('#replay-exit').addEventListener('click', stopDemo)
@@ -378,9 +423,11 @@ async function start() {
   exitEl.addEventListener('click', exitLive)
 
   document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape' || !wizardEl.hidden) return
+    if (event.key !== 'Escape') return
+    if (!aboutEl.hidden) { aboutEl.hidden = true; return }
+    if (!wizardEl.hidden) return
     if (demo) stopDemo()
-    else if (liveKey !== null) exitLive()
+    else if (watching) exitLive()
   })
 
   for (const [id, url] of [
