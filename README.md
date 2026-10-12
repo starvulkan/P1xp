@@ -128,7 +128,9 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 P1xp ships with no hero circuit photography. By default, the hero is empty. If you want a photo of the track there (like in the display images in this very interesting README), you are free to pick them by yourself!
 
-**Where's Waldo? Eh, sorry, the image folder!**
+---
+
+**Where's Waldo? Eh, sorry, the image folder?**
 
 | OS | Folder |
 |---|---|
@@ -137,6 +139,8 @@ P1xp ships with no hero circuit photography. By default, the hero is empty. If y
 | Linux | `~/.config/P1XP/tracks` |
 
 For your convinience, you can find this folder in **About → Open image folder**.
+
+---
 
 **How do I add my incredible images?**
 
@@ -147,20 +151,26 @@ For your convinience, you can find this folder in **About → Open image folder*
 
 `.webp`, `.jpg` and `.png` all work, and roughly 1920x1080 is the best for appearance.
 
+---
+
 **Those stubborn circuit names YOU NEED to use for your images!**
 
-abu-dhabi, australia, austria, azerbaijan, bahrain, barcelona, belgium,
-brazil, britain, canada, china, emilia-romagna, hungary, italy, japan,
-las-vegas, madrid, malaysia, mexico, miami, monaco, netherlands,
-portugal, qatar, saudi-arabia, singapore, turkiye, united-states.
+`abu-dhabi`, `australia`, `austria`, `azerbaijan`, `bahrain`, `barcelona`, `belgium`,
+`brazil`, `britain`, `canada`, `china`, `emilia-romagna`, `hungary`, `italy`, `japan`,
+`las-vegas`, `madrid`, `malaysia`, `mexico`, `miami`, `monaco`, `netherlands`,
+`portugal`, `qatar`, `saudi-arabia`, `singapore`, `turkiye`, `united-states`.
 
 <sub>In case any track gets added to the calendar, I would have to update the app so it supports images for that specific track. I tried to cover as many possibilities here as possible (don't judge my word choice).</sub>
+
+---
 
 **How to name your file: the example!**
 
 so wow I have a very cool and amazing WEBP image for spa! imma add it to P1xp! so, lemme name it `belgium.webp`!
 
 oh look, I found another one, a PNG one, for COTA! isn't it so peak? lemme name it `united-states.png`!
+
+---
 
 **But starvulkan, why did you give the user more work and didn't bundle the images yourself?**
 
