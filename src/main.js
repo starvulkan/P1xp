@@ -26,6 +26,7 @@ const VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'
 const wizardEl = document.querySelector('#wizard')
 const aboutEl = document.querySelector('#about')
 const aboutBuild = document.querySelector('#about-build')
+const aboutTracks = document.querySelector('#about-tracks')
 const homeEl = document.querySelector('#home')
 const liveEl = document.querySelector('#live')
 const feedEl = document.querySelector('#live-feed')
@@ -430,6 +431,12 @@ async function start() {
   aboutBuild.textContent = `P1xp build ${VERSION}`
   document.querySelector('#about-open').addEventListener('click', () => { aboutEl.hidden = false })
   document.querySelector('#about-close').addEventListener('click', () => { aboutEl.hidden = true })
+
+  if (window.p1xp && window.p1xp.openTracks) {
+    aboutTracks.hidden = false
+    aboutTracks.addEventListener('click', () => window.p1xp.openTracks())
+  }
+
   aboutEl.addEventListener('click', (event) => { if (event.target === aboutEl) aboutEl.hidden = true })
   document.querySelector('#setup-open').addEventListener('click', openSetup)
   document.querySelector('#demo-open').addEventListener('click', startDemo)

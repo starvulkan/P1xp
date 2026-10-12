@@ -1,10 +1,17 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron')
 const path = require('node:path')
 const live = require('./live.cjs')
+const fs = require('node:fs')
 
 const DEV = process.argv.includes('--dev')
 const RECORD = process.argv.includes('--record')
 let win = null
+
+const TYPES = { webp: 'webp', jpg: 'jpeg', jpeg: 'jpeg', png: 'png' }
+
+function tracksDir() {
+    return path.join(app.getPath('userData'), 'tracks')
+}
 
 function create() {
     win = new BrowserWindow({
@@ -33,6 +40,11 @@ function create() {
 }
 
 app.whenReady().then(() => {
+    try { 
+        fs.mkdirSync(tracksDir(), { recursive: true }) 
+    } catch (error) { 
+        console.warn('tracks:', error) 
+    }
     create()
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) create() })
 })
@@ -52,3 +64,24 @@ ipcMain.handle('live:start', async () => {
 })
 
 ipcMain.handle('live:stop', async () => live.stop())
+
+ipcMain.handle('tracks:find', async (_event, slug) => {
+    if (typeof slug !== 'string' || !/^[a-z0-9-]{1,40}$/.test(slug)) return null
+
+    for (const [ext, type] of Object.entries(TYPES)) {
+        const file = path.join(tracksDir(), `${slug}.${ext}`)
+        try {
+            if (!fs.existsSync(file)) continue
+            return `data:image/${type};base64,${fs.readFileSync(file).toString('base64')}`
+        } catch (error) {
+            console.warn('tracks:', error)
+        }
+    }
+    return null
+})
+
+ipcMain.handle('tracks:open', async () => {
+    const dir = tracksDir()
+    try { fs.mkdirSync(dir, { recursive: true }) } catch (error) { console.warn('tracks:', error) }
+    return shell.openPath(dir)
+})

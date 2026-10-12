@@ -87,9 +87,20 @@ export function slugFor(session) {
     return BY_COUNTRY[plain(session.country)] || null
 }
 
-export function urlFor(session) {
-    const slug = slugFor(session)
-    return slug ? `./tracks/${slug}.webp` : null
+const mine = new Map()
+
+async function userFor(slug) {
+    if (mine.has(slug)) return mine.get(slug)
+    let found = null
+    try {
+        if (typeof window !== 'undefined' && window.p1xp && window.p1xp.findTrack) {
+            found = await window.p1xp.findTrack(slug)
+        }
+    } catch (error) {
+        console.warn('tracks:', error)
+    }
+    mine.set(slug, found)
+    return found
 }
 
 function preload(src, timeoutMs = 8000) {
@@ -113,7 +124,10 @@ export function mount({ photoEl, scrimEl }) {
     }
 
     return async function apply(session) {
-        const url = urlFor(session)
+        const slug = slugFor(session)
+        if (!slug) { hide(); return null }
+
+        const url = await userFor(slug)
         if (!url) { hide(); return null }
         if (url === showing) return showing
 

@@ -88,6 +88,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 ---
 
 <h3>Layouts!</h3>
+
 <sub>NOTE: these images come from the DEMO, that's why the circuit map includes driver track position dots, as the historical data used here can be accessed for free from OpenF1. Live mode doesn't have these dots in the circuit map, as to get that working a F1 TV subscription has to be DIRECTLY connected to the app, and for safety reasons I rather not implement this feature.</sub>
 
 ---
@@ -112,7 +113,7 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 **Layouts:**
 
-*The amount of allocated spaces for F1 TV live streams you get in your live mode is determined by your choice in the setup wizard. (No F1 TV -> 0, F1 TV Pro -> 1 (race feed), F1 TV Premium -> 2 (race feed + fav driver onboard))*
+*The amount of allocated spaces for F1 TV live streams you get in your live mode is determined by your choice in the setup wizard. (No F1 TV → 0, F1 TV Pro → 1 (race feed), F1 TV Premium → 2 (race feed + fav driver onboard))*
 
 1. Circuit map.
 2. Race control.
@@ -123,9 +124,52 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 ---
 
-<h1>About API Usage!</h1>
+<h1>Use your own hero circuit photos!</h1>
+
+P1xp ships with no hero circuit photography. By default, the hero is empty. If you want a photo of the track there (like in the display images in this very interesting README), you are free to pick them by yourself!
+
+**Where's Waldo? Eh, sorry, the image folder!**
+
+| OS | Folder |
+|---|---|
+| Windows | `AppData\Roaming\p1xp\tracks` |
+| macOS | `~/Library/Application Support/P1XP/tracks` |
+| Linux | `~/.config/P1XP/tracks` |
+
+For your convinience, you can find this folder in **About → Open image folder**.
+
+**How do I add my incredible images?**
+
+1. Find any photo you like! Landscape is forced EH, I MEAN, **recommended**.
+2. Name it after the circuit, using the **EXACT** names below. No exceptions!
+3. Drop it in the folder.
+4. Restart P1xp, and enjoy your images!
+
+`.webp`, `.jpg` and `.png` all work, and roughly 1920x1080 is the best for appearance.
+
+**Those stubborn circuit names YOU NEED to use for your images!**
+
+abu-dhabi, australia, austria, azerbaijan, bahrain, barcelona, belgium,
+brazil, britain, canada, china, emilia-romagna, hungary, italy, japan,
+las-vegas, madrid, malaysia, mexico, miami, monaco, netherlands,
+portugal, qatar, saudi-arabia, singapore, turkiye, united-states.
+
+<sub>In case any track gets added to the calendar, I would have to update the app so it supports images for that specific track. I tried to cover as many possibilities here as possible (don't judge my word choice).</sub>
+
+**How to name your file: the example!**
+
+so wow I have a very cool and amazing WEBP image for spa! imma add it to P1xp! so, lemme name it `belgium.webp`!
+
+oh look, I found another one, a PNG one, for COTA! isn't it so peak? lemme name it `united-states.png`!
+
+**But starvulkan, why did you give the user more work and didn't bundle the images yourself?**
+
+cuz copyright is a thing, highly smart human! the best images are mostly always owned by an agency or a team, and there's barely any good free ones to use. and if I bundle the good ones (the ones I have in my P1xp install), I will be sent to the sixth layer of copyright hell for the unforgivable sin of redistribution. so, instead of forcing you a bunch of mid-quality images, I give you the amazing power of choosing your own from whatever source!
 
 ---
+
+<h1>About API Usage!</h1>
+
 
 **P1xp relies on three APIs to work:**
 
@@ -154,6 +198,10 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 <h1>Made for Stardance!</h1>
 
 this project was created as part of the Hack Club Stardance challenge!
+
+---
+
+<sub>P1xp is an unofficial project and is not associated with Formula 1, the FIA, or any team. F1, FORMULA 1 and related marks are trade marks of Formula One Licensing BV.</sub>
 
 
 
