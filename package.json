@@ -5,6 +5,7 @@
   "description": "Experience F1 as never before.",
   "homepage": "https://starvulkan.github.io/P1xp/",
   "author": "starvulkan",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/starvulkan/P1xp.git"
