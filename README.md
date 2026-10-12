@@ -128,6 +128,10 @@ Apart from combining my favorite hobbies (programming and motorsport), I've alwa
 
 P1xp ships with no hero circuit photography. By default, the hero is empty. If you want a photo of the track there (like in the display images in this very interesting README), you are free to pick them by yourself!
 
+![Home](docs/screenshots/home_normal.png)
+
+<sub>*Home menu with COTA circuit hero image.*</sub>
+
 ---
 
 **Where's Waldo? Eh, sorry, the image folder?**
